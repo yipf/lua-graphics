@@ -1,0 +1,76 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="1000" height="1000" version="1.1" xmlns="http://www.w3.org/2000/svg" font-size="20px" stroke-width = "2" fill="white" stroke="black" viewBox="0 0 1000 1000">
+    <defs>
+		<marker id="arrow" viewBox="0 0 20 20" refX="20" refY="10" markerUnits="strokeWidth" fill="black" markerWidth="8" markerHeight="6" orient="auto">
+			<path d="M 0 0 L 20 10 L 0 20 L 10 10 z"/>
+		</marker>
+		<marker id="point2d" viewBox="0 0 20 20" refX="10" refY="10" markerUnits="strokeWidth" fill="orange" markerWidth="6" markerHeight="6" orient="auto">
+			<circle cx="10" cy="10" r="9" />
+		</marker>
+				<marker id="point2d-black" viewBox="0 0 20 20" refX="10" refY="10" markerUnits="strokeWidth" fill="black" markerWidth="6" markerHeight="6" orient="auto">
+			<circle cx="10" cy="10" r="9" />
+		</marker>
+		<marker id="point2d-white" viewBox="0 0 20 20" refX="10" refY="10" markerUnits="strokeWidth" fill="white" markerWidth="6" markerHeight="6" orient="auto">
+			<circle cx="10" cy="10" r="9" />
+		</marker>
+		<marker id="point2d-gray" viewBox="0 0 20 20" refX="10" refY="10" markerUnits="strokeWidth" fill="#888888" markerWidth="6" markerHeight="6" orient="auto">
+			<circle cx="10" cy="10" r="9" />
+		</marker>
+		 <filter id='shadow' filterRes='50' x='0' y='0'>
+			<feGaussianBlur stdDeviation='2 2'/>
+			<feOffset dx='2' dy='2'/>
+		</filter>
+		<linearGradient x1='0%' x2='100%' id='linear0' y1='0%' y2='100%'>
+			<stop offset='0%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='100%' style='stop-color:rgb(220,220,220);stop-opacity:1'/>
+		</linearGradient>
+		<linearGradient x1='0%' x2='100%' id='multi0' y1='100%' y2='100%'>
+			<stop offset='0%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='45%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='46%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='50%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='54%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='55%' style='stop-color:rgb(220,220,220);stop-opacity:1'/>
+			<stop offset='100%' style='stop-color:rgb(220,220,220);stop-opacity:1'/>
+		</linearGradient>
+		<linearGradient x1='100%' x2='0%' id='multi1' y1='100%' y2='100%'>
+			<stop offset='0%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='45%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='46%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='50%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='54%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='55%' style='stop-color:rgb(220,220,220);stop-opacity:1'/>
+			<stop offset='100%' style='stop-color:rgb(220,220,220);stop-opacity:1'/>
+		</linearGradient>
+		<linearGradient x1='100%' x2='0%' id='multi2' y1='100%' y2='100%'>
+			<stop offset='0%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='45%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='46%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='50%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='54%' style='stop-color:rgb(0,0,0);stop-opacity:1'/>
+			<stop offset='55%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+			<stop offset='100%' style='stop-color:rgb(255,255,255);stop-opacity:1'/>
+		</linearGradient>
+		<radialGradient id="radial0" cx="30%" cy="30%" r="50%">
+			<stop offset="0%" style="stop-color:rgb(255,255,255); stop-opacity:0" />
+			<stop offset="100%" style="stop-color:rgb(0,0,255);stop-opacity:1" />
+     </radialGradient>
+	 
+     </defs>
+	<rect x="540" y="170" width="120" height="60" filter="nil"  style=""/><text x="600" y="208" stroke-width="0" fill="black" text-anchor="middle">System</text>
+<rect x="240" y="370" width="120" height="60" filter="nil"  style=""/><text x="300" y="408" stroke-width="0" fill="black" text-anchor="middle">Graphic</text>
+<rect x="140" y="570" width="120" height="60" filter="nil"  style=""/><text x="200" y="608" stroke-width="0" fill="black" text-anchor="middle">STB image</text>
+<path d = "M285 430 L215 570" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<rect x="340" y="570" width="120" height="60" filter="nil"  style=""/><text x="400" y="608" stroke-width="0" fill="black" text-anchor="middle">OpenGL</text>
+<path d = "M315 430 L385 570" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<path d = "M555 230 L345 370" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<rect x="740" y="370" width="120" height="60" filter="nil"  style=""/><text x="800" y="408" stroke-width="0" fill="black" text-anchor="middle">GUI(IUP)</text>
+<rect x="540" y="570" width="120" height="60" filter="nil"  style=""/><text x="600" y="598" stroke-width="0" fill="black" text-anchor="middle">Common</text><text x="600" y="618" stroke-width="0" fill="black" text-anchor="middle">Controls</text>
+<path d = "M770 430 L630 570" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<rect x="740" y="570" width="120" height="60" filter="nil"  style=""/><text x="800" y="608" stroke-width="0" fill="black" text-anchor="middle">GL canvas</text>
+<path d = "M800 430 L800 570" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<rect x="940" y="570" width="120" height="60" filter="nil"  style=""/><text x="1000" y="598" stroke-width="0" fill="black" text-anchor="middle">OS specific</text><text x="1000" y="618" stroke-width="0" fill="black" text-anchor="middle">Dialogs</text>
+<path d = "M830 430 L970 570" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+<path d = "M630 230 L770 370" fill = "none" stroke = "nil"  stroke-linejoin="round" marker-end = "nil" marker-mid="nil" marker-start="nil" style="fill:none;" filter="nil" />
+</svg>

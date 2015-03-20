@@ -1,0 +1,17 @@
+require "plugins/tree"
+
+set_tree_props{rx=60,ry=30,DX=200,DY=200}
+
+local tr=make_tree_UD{"System",{
+	{"Graphic",{
+		{"STB image"},
+		{"OpenGL"},
+	}},
+	{"GUI(IUP)",{
+		{{"Common","Controls"}},
+		{"GL canvas"},
+		{{"OS specific","Dialogs"}},
+	}},
+}}
+
+export("./overview.png")

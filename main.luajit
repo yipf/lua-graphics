@@ -1,0 +1,29 @@
+local DIR="./"
+
+package.path=DIR.."/?.lua;"..package.path
+package.cpath="/usr/lib/lib?51.so;/usr/lib/lib?.so;"..package.cpath
+
+require 'lua-utils/clib-loader'
+API=clib_loader"yipf-img-gl"
+
+require 'lua-utils/register'
+
+require 'plugin/drawers'
+require 'plugin/texture-generaters'
+
+require 'UI/config'
+require 'UI/widgets'
+
+
+local scn=dofile(DIR.."/scn/test.lua")
+
+
+
+--~ local s=clib_loader"yipf-img-gl"
+
+--~ print(s.load_img)
+
+--~ local img=s.load_img("data/2.png",4)
+--~ print(img.data,img.x,img.y) 
+
+--~ s.save_img(img,"./data/sss.png")

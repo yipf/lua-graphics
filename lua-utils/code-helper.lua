@@ -59,3 +59,6 @@ QUAD_STRIP
 for s in string.gmatch(str,"[A-Z_]+") do
 	print(string.format("%s,",s))
 end
+
+print(math.rad(180))
+print(math.rad(360))

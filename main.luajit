@@ -18,7 +18,6 @@ require 'UI/widgets'
 local scn=dofile(DIR.."/scn/test.lua")
 
 
-
 --~ local s=clib_loader"yipf-img-gl"
 
 --~ print(s.load_img)

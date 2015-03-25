@@ -1,5 +1,11 @@
-local f=function(o)
-	API.draw_box(o[1] or 2)
+local f=function(r)
+	API.draw_box(r or 2)
 end
 
 drawer_hooks("box",f)
+
+local f=function(r)
+	API.draw_plane(r or 2)
+end
+
+drawer_hooks("plane",f)

@@ -5,9 +5,28 @@ require 'UI/gl_canvas'
 local API=API
 local camera=API.create_camera()
 camera=API.make_camera(camera,0,0,0,10)
-camera=API.set_camera_projection(camera,1,1000,45,1)
+camera=API.set_camera_projection(camera,1,1000,math.rad(90),1)
+camera=API.update_camera(camera)
 
-local glw,gl_cfg=make_gl_canvas({},camera,800,800)
+local box={"box",1}
+
+local m2=API.make_translate(API.create_mat4x4(),2,0,0)
+local m1=API.make_scale(API.create_mat4x4(),2,0.5,0.5)
+
+m1=API.mult_matrix(m2,m1,m1)
+
+
+local m3=API.make_scale(API.create_mat4x4(),0.5,2,0.5)
+m2=API.make_translate(m2,0,2,0)
+m3=API.mult_matrix(m2,m3,m3)
+
+
+local scn={
+  {drawer=box,texture={"color",255,0,0,255},matrix=m1},
+  {drawer=box,texture={"color",0,255,0,255},matrix=m3},
+}
+
+local glw,gl_cfg=make_gl_canvas(scn,camera,800,800)
 local gl_panel=frame{title="GL",glw}
 
 -- main dialog

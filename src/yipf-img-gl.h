@@ -40,11 +40,9 @@ mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst);
 mat4x4 invert_mat(mat4x4 m,mat4x4 inv);
 vec4 apply_mat(mat4x4 m,vec4 v, vec4 result);/* v=m*v1 */
 
-/* OpenGL helper*/
+void print_matrix(mat4x4 m);
 
-int my_init(void);
-
-typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T; mat4x4 projection; mat4x4 view;} camera_type_;
+typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T,temp_vec4; mat4x4 projection; mat4x4 view;} camera_type_;
 typedef camera_type_* camera_type;
 
 static scalar PI;
@@ -65,12 +63,30 @@ camera_type update_camera(camera_type c);
 
 camera_type camera_type_look(camera_type c);
 
+/* OpenGL helper*/
+
+
+unsigned int push_and_apply_matrix(mat4x4 m);
+
+unsigned int push_and_apply_texture(GLuint t);
+
+unsigned int pop_matrix(void);
+
+unsigned int pop_texture(void);
+
+int my_init(unsigned int matrix_max,unsigned int texture_max);
+
+
+
+
 /* 2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768,65536 */
 enum{TEXTURE_2D=2,LIGHTING=4,CULL_FACE=8,BLEND=16,FILL=32,SMOOTH=64,FOG=128};
 
 int gl_options(int op);
 int gl_set_light(int id,scalar x,scalar y,scalar z,scalar w);
+int gl_set_bg_color(unsigned char r,unsigned char g,unsigned char b,unsigned char a);
 int gl_clear_all(void);
+int gl_set_viewport(int x,int y,int w, int h);
 
 /* texture */
 typedef struct{unsigned char* data; unsigned w; unsigned h;} texture_type_;
@@ -79,12 +95,20 @@ texture_type gen_mem_img(unsigned int w,unsigned int h);
 texture_type set_mem_img_color(texture_type tex, unsigned int x,unsigned int y, unsigned char r,unsigned char g,unsigned char b,unsigned char a );
 unsigned int mem_img2texture(texture_type tex);
 unsigned int img2texture(char const *filepath);
+
+
+static scalar* MATRIX_STACK;
+static GLuint* TEXTURE_STACK;
+static unsigned int MATRIX_STACK_TOP,TEXTURE_STACK_TOP;
+
 /* call list */
-int begin_gen_calllist(void);
-int end_gen_calllist(void);
+GLuint begin_gen_calllist(void);
+GLuint end_gen_calllist(void);
+GLuint call_list(GLuint id);
 /* drawer */
 enum{POINTS,LINES,POLYGON,TRIANGLES,QUADS,LINE_STRIP,LINE_LOOP,TRIANGLE_STRIP,TRIANGLE_FAN,QUAD_STRIP};
 int begin_draw(int type);
 int end_draw(int type);
 int set_vertex(scalar x,scalar y,scalar z,scalar tx,scalar ty, scalar nx, scalar ny, scalar nz);
 int draw_box(scalar r);
+int draw_plane(scalar r);

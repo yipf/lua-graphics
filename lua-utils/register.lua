@@ -18,22 +18,39 @@ end
 drawer_hooks=make_register_table()
 texture_hooks=make_register_table()
 
+local init_drawer_=function(drawer)
+	if type(drawer[1])=='function' then return drawer end
+	local f=drawer and drawer_hooks(drawer[1])
+	if drawer and not f then 
+		print("Not valid drawer type:",drawer[1]) 
+		return 
+	end
+	drawer[1]=f
+	return drawer
+end
+
+local pcall,unpack=pcall,unpack
+
+local draw_direct_=function(d)
+	pcall(unpack(d))
+end
+
+init_drawer,draw_direct=init_drawer_, draw_direct_
+
 local obj2callid=function(o)
-	local d,id=drawer_hooks(o.TYPE)
-	if not d then print("Not valid drawer type:",o.TYPE) return end
-	local static=not o.DYNAMIC
---~ 	if static then id= end -- start calllist
-	d(o)
---~ 	if static then end --end calllist
-	return static and id
+	if type(o[1])~='function'  then return end 	-- test drawer to know if it is drawable
+	id=API.begin_gen_calllist()
+	draw_direct(o)
+	API.end_gen_calllist()
+	return id
 end
 
 calllist_table=make_register_table(obj2callid)
 
 local obj2texid=function(o)
-	local t,id=texture_hooks(o.TYPE)
-	if not t then print("Not valid texture type:",o.TYPE) return end
-	return t(o)
+	local f,id=texture_hooks(o[1])
+	if not f then print("Not valid texture type:",o.TYPE) return end
+	return f(unpack(o,2))
 end
 
 texture_table=make_register_table(obj2texid)

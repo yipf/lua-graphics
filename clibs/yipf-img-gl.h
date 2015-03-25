@@ -1,3 +1,8 @@
+
+typedef unsigned int GLuint;
+typedef float GLfloat;
+typedef float GLclampf;
+
 typedef void* data_type;
 typedef struct img_type_{ int x; int y; int comp; int stride_bytes; data_type data;} img_type_;
 typedef img_type_* img_type;
@@ -7,10 +12,10 @@ int delete_img(img_type img);
 int save_img(img_type img,const char* filepath);
 img_type load_img(char const *filepath,int req_comp);
 
-typedef float GLfloat;
 typedef GLfloat scalar;
 typedef scalar* vec4;
 typedef scalar* mat4x4;
+
 
 /* vec functions*/
 vec4 create_vec4(scalar x,scalar y,scalar z);
@@ -32,13 +37,20 @@ mat4x4 mult_matrix(mat4x4 m2,mat4x4 m1,mat4x4 m);/*	m*v=m2*m1*v  */
 mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst);
 mat4x4 invert_mat(mat4x4 m,mat4x4 inv);
 vec4 apply_mat(mat4x4 m,vec4 v, vec4 result);/* v=m*v1 */
-
+void print_matrix(mat4x4 m);
 /* OpenGL helper*/
+unsigned int push_and_apply_matrix(mat4x4 m);
 
-int my_init(void);
+unsigned int push_and_apply_texture(GLuint t);
+
+unsigned int pop_matrix(void);
+
+unsigned int pop_texture(void);
+
+int my_init(unsigned int matrix_max,unsigned int texture_max);
 
 //~ typedef struct{mat4x4 cm; mat4x4 projection; mat4x4 view; vec4 target;} camera_type_;
-typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T; mat4x4 projection; mat4x4 view;} camera_type_;
+typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T,temp_vec4; mat4x4 projection; mat4x4 view;} camera_type_;
 typedef camera_type_* camera_type;
 
 camera_type create_camera(void);
@@ -62,8 +74,9 @@ enum{TEXTURE_2D=2,LIGHTING=4,CULL_FACE=8,BLEND=16,FILL=32,SMOOTH=64,FOG=128};
 
 int gl_options(int op);
 int gl_set_light(int id,scalar x,scalar y,scalar z,scalar w);
+int gl_set_bg_color(unsigned char r,unsigned char g,unsigned char b,unsigned char a);
 int gl_clear_all(void);
-
+int gl_set_viewport(int x,int y,int w, int h);
 
 /* texture */
 typedef struct{unsigned char* data; unsigned w; unsigned h;} texture_type_;
@@ -73,11 +86,13 @@ texture_type set_mem_img_color(texture_type tex, unsigned int x,unsigned int y, 
 unsigned int mem_img2texture(texture_type tex);
 unsigned int img2texture(char const *filepath);
 /* call list */
-int begin_gen_calllist(void);
-int end_gen_calllist(void);
+GLuint begin_gen_calllist(void);
+GLuint end_gen_calllist(void);
+GLuint call_list(GLuint id);
 /* drawer */
-enum{QUADS,TRIANGLE_STRIP};
+enum{POINTS,LINES,POLYGON,TRIANGLES,QUADS,LINE_STRIP,LINE_LOOP,TRIANGLE_STRIP,TRIANGLE_FAN,QUAD_STRIP};
 int begin_draw(int type);
 int end_draw(int type);
 int set_vertex(scalar x,scalar y,scalar z,scalar tx,scalar ty, scalar nx, scalar ny, scalar nz);
 int draw_box(scalar r);
+int draw_plane(scalar r);

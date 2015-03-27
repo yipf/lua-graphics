@@ -40,7 +40,7 @@ init_drawer,draw_direct=init_drawer_, draw_direct_
 local obj2callid=function(o)
 	if type(o[1])~='function'  then return end 	-- test drawer to know if it is drawable
 	id=API.begin_gen_calllist()
-	draw_direct(o)
+	draw_direct_(o)
 	API.end_gen_calllist()
 	return id
 end
@@ -49,7 +49,8 @@ calllist_table=make_register_table(obj2callid)
 
 local obj2texid=function(o)
 	local f,id=texture_hooks(o[1])
-	if not f then print("Not valid texture type:",o.TYPE) return end
+	if not f then print("Not valid texture type:",o[1]) return end
+	o[1]=f
 	return f(unpack(o,2))
 end
 

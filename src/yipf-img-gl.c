@@ -46,10 +46,10 @@ vec4 cross(vec4 v1,vec4 v2,vec4 v){
 	return v;
 }
 
-scalar dot(vec4 v1,vec4 v2){
+scalar dot(vec4 v1,vec4 v2,int n){
 	scalar d=0;
 	int i;
-	for(i=0;i<3;i++){d=d+v1[i]*v2[i];}
+	for(i=0;i<n;i++){d=d+v1[i]*v2[i];}
 	return d;
 }
 
@@ -67,11 +67,12 @@ vec4 normalize(vec4 v){
 	return v;
 }
 
-vec4 clone_vec4(vec4 src,vec4 dst){
+vec4 clone_vec4(vec4 src,vec4 dst,int n){
+	if(dst==src){ return dst;	}
 	if(!src) return src;
 	dst=dst?dst:create_vec4(0,0,0);
 	int i;
-	for(i=0;i<4;i++){dst[i]=src[i];	}
+	for(i=0;i<n;i++){dst[i]=src[i];	}
 	return dst;
 }
 
@@ -170,6 +171,7 @@ vec4 apply_mat(mat4x4 m1,vec4 v1, vec4 v){
 }
 
 mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst){
+	if(dst==src){ return dst;	}
 	if(!src) return src;
 	dst=dst?dst:create_mat4x4(0,0,0);
 	int i;
@@ -177,18 +179,9 @@ mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst){
 	return dst;	
 }
 
-mat4x4 invert_mat(mat4x4 m,mat4x4 inv){
-	inv=inv?inv:create_mat4x4();
-	inv[0]=m[0];	inv[1]=m[4];		inv[2]=m[8];								inv[3]=0;
-	inv[4]=m[1];	inv[5]=m[5];		inv[6]=m[9];								inv[7]=0;
-	inv[8]=m[2];	inv[9]=m[6];		inv[10]=m[10];							inv[11]=0;
-	inv[12]=-m[12];		inv[13]=-m[13];			inv[14]=-m[14];			inv[15]=1;
-	return inv;
-}
-
-
 static scalar PI=3.1415926535898;
 static scalar D_PI=6.2831853071796;
+
 
 unsigned int push_and_apply_matrix(mat4x4 m){
 	glGetFloatv(GL_MODELVIEW_MATRIX,MATRIX_STACK+(MATRIX_STACK_TOP<<4));
@@ -227,9 +220,9 @@ int my_init(unsigned int matrix_max,unsigned int texture_max){
 	glEnable(GL_DEPTH_TEST);   // Enables Depth Testing
 	glDepthFunc(GL_LEQUAL);    // The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
-	glEnable(GL_TEXTURE_2D); // always enable textures
 	glEnable(GL_NORMALIZE);
 	glAlphaFunc(GL_GREATER,0.1); 
+	glEnable(GL_TEXTURE_2D); // always enable textures
 	return 0;
 }
 
@@ -250,7 +243,6 @@ camera_type make_camera(camera_type c, scalar x, scalar y, scalar z, scalar dist
 	c->Y=create_vec4(0,1,0);
 	c->Z=create_vec4(0,0,1);
 	c->T=create_vec4(x,y,z);
-	c->temp_vec4=create_vec4(0,0,0);
 	c->dist=dist;
 	c->h=0;
 	c->v=0;
@@ -293,6 +285,19 @@ camera_type scale_camera(camera_type c,scalar s){
 	return c;
 }
 
+camera_type set_camera_position(camera_type c, scalar x, scalar y, scalar z){
+	vec4 pos=c->T;
+	pos[0]=x; 	pos[1]=y; 	pos[2]=z; 	
+	return c;
+}
+
+camera_type resize_camera(camera_type c, scalar w, scalar h){
+	mat4x4 proj=c->projection;
+	proj[0]*=w;
+	proj[5]*=h;
+	return c;
+}
+
 
 void print_matrix(mat4x4 m){
 	int i;
@@ -321,13 +326,15 @@ camera_type update_camera_observe(camera_type c){
 	vec4 x,y,z,t,v;
 	scalar d;
 	view=c->view;
-	x=c->X; 	y=c->Y; 	z=c->Z; 	t=c->T; 	v=c->temp_vec4;
+	x=c->X; 	y=c->Y; 	z=c->Z; 	t=c->T;
 	d=c->dist;
+	v=TEMP_VEC4;
 	v[0]=-d*z[0]-t[0]; v[1]=-d*z[1]-t[1];	v[2]=-d*z[2]-t[2];
+	// get invert matrix 
 	view[0]=x[0];				view[1]=y[0];				view[2]		=z[0];			view[3]=0;
 	view[4]=x[1];				view[5]=y[1];				view[6]		=z[1];			view[7]=0;
 	view[8]=x[2];				view[9]=y[2];				view[10]	=z[2];			view[11]=0;
-	view[12]=dot(v,x);	view[13]=dot(v,y);	view[14]=dot(v,z);	view[15]=1;	
+	view[12]=dot(v,x,3);	view[13]=dot(v,y,3);	view[14]=dot(v,z,3);	view[15]=1;	
 	return c;
 }
 
@@ -353,20 +360,10 @@ camera_type camera_look(camera_type c){
 	/* set projection matrix*/
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(c->projection);
+	glMultMatrixf(c->view);
 	//~ /* set modelview matrix*/
 	glMatrixMode(GL_MODELVIEW);
-	glLoadMatrixf(c->view);
-	
-	//~ mat4x4 m=create_mat4x4();
-	//~ printf("\nprojection matrix:");	print_matrix(c->projection);
-	//~ printf("\nModelView Matrix:");	print_matrix(c->view);
-	//~ printf("\nFinal Matrix:");print_matrix(mult_matrix(c->projection,c->view,m));
-	//~ glGetFloatv(GL_PROJECTION_MATRIX,m);
-	//~ printf("\nReal Matrix(projection):");	print_matrix(m);
-	//~ glGetFloatv(GL_MODELVIEW_MATRIX,m);
-	//~ printf("\nReal Matrix(modelview):");	print_matrix(m);
-	//~ free(m);
-	
+	//~ glLoadIdentity();
 	return c;
 }
 
@@ -382,12 +379,12 @@ int gl_options(int op){
 }
 
 int gl_set_light(int id,scalar x,scalar y,scalar z,scalar w){
-	vec4 pos=create_vec4(x,y,z);
-	pos[3]=w;
+	TEMP_VEC4[0]=x; TEMP_VEC4[1]=y; TEMP_VEC4[2]=z; TEMP_VEC4[3]=w;
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glEnable(GL_LIGHT0);
 	switch(id){
-		case 0:
-			glLightfv (GL_LIGHT0, GL_POSITION, pos);
-			break;
+		case 0: glLightfv (GL_LIGHT0, GL_POSITION, TEMP_VEC4);			break;
 		default: break;
 	}
 	return 0;
@@ -421,23 +418,44 @@ texture_type set_mem_img_color(texture_type tex, unsigned int x,unsigned int y, 
 	}else{
 		p=(tex->data)+(y*(tex->w)+x)*4;
 	}
-	p[0]=r;	p[0]=g;	p[0]=b;	p[0]=a;	
+	p[0]=r;	p[1]=g;	p[2]=b;	p[3]=a;	
 	return tex;
 }
-unsigned int mem_img2texture(texture_type tex){
-	unsigned int id;
+
+GLuint mem_img2texture(texture_type tex){
+	GLuint id;
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id );
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w,tex->h, 0,  GL_RGBA, GL_UNSIGNED_BYTE, tex->data );
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w,tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex->data );
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	free(tex->data);
 	free(tex);
 	return id;
 }
 
-unsigned int img2texture(char const *filepath){
-	unsigned int id;
+GLuint img2texture(char const *filepath){
+	GLuint id;
+	unsigned int w,h,comp;
+	unsigned char *data;
+	data=stbi_load(filepath,&w,&h,&comp,4);
+	if(!data){
+		printf("Error when loading file: %s",filepath);
+		return 0;
+	}
+	printf("\n%d\t%d\t%d\%d\n",data[0],data[1],data[2],data[3]);
+	glGenTextures(1, &id);
+	glBindTexture(GL_TEXTURE_2D, id );
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,w,h, 0,  GL_RGBA, GL_UNSIGNED_BYTE, data );
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	free(data);
 	return id;
 }
 /* call list */
@@ -474,9 +492,8 @@ int begin_draw(int type){
 	}
 	return type;
 }
-int end_draw(int type){
+int end_draw(void){
 	glEnd();
-	return type;
 }
 
 int set_vertex(scalar x,scalar y,scalar z,scalar tx,scalar ty, scalar nx, scalar ny, scalar nz){
@@ -495,7 +512,7 @@ int draw_box(scalar r){
 	/* left */
 	set_vertex(-r,r,r,0,0,-1,0,0);set_vertex(-r,r,-r,0,1,-1,0,0);set_vertex(-r,-r,-r,1,1,-1,0,0);set_vertex(-r,-r,r,1,0,-1,0,0);
 	/* right */
-	set_vertex(r,r,r,0,0,1,0,0);set_vertex(r,-r,r,0,1,1,0,0);set_vertex(r,-r,-r,1,1,1,0,0);set_vertex(-r,r,-r,1,0,1,0,0);
+	set_vertex(r,r,r,0,0,1,0,0);set_vertex(r,-r,r,0,1,1,0,0);set_vertex(r,-r,-r,1,1,1,0,0);set_vertex(r,r,-r,1,0,1,0,0);
 	/* front */
 	set_vertex(r,r,r,0,0,0,0,1);set_vertex(-r,r,r,0,1,0,0,1);set_vertex(-r,-r,r,1,1,0,0,1);set_vertex(r,-r,r,1,0,0,0,1);
 	/* back */
@@ -506,7 +523,9 @@ int draw_box(scalar r){
 
 int draw_plane(scalar r){
 	glBegin(GL_QUADS);
-	set_vertex(r,0,r,0,0,0,1,0);set_vertex(r,0,-r,0,1,0,1,0);set_vertex(-r,0,-r,1,1,0,1,0);set_vertex(-r,0,r,1,0,0,1,0);
+	set_vertex(r,0,r,0.0,0.0,0,1,0);set_vertex(r,0,-r,0.0,1.0,0,1,0);set_vertex(-r,0,-r,1.0,1.0,0,1,0);set_vertex(-r,0,r,1.0,0.0,0,1,0);
 	glEnd();
 	return 0;
 }
+
+

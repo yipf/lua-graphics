@@ -8,7 +8,7 @@ local API=API
 local CONFIG_STR=[[
 Scene %t
 Shadow: %b
-Fog: %b
+Texture: %b
 Alpha: %b
 Background: %c
 Light %t
@@ -29,8 +29,8 @@ local do_tree=do_tree
 local init_callid_and_texture=function(o)
 	local drawer,texture=o.drawer,o.texture
 	drawer=drawer and init_drawer(drawer) 
-	if drawer and (not o.DYNAMIC) then o.drawer_id=calllist_table(drawer) end
 	if texture then o.texture_id=texture_table(texture) end
+	if drawer and (not o.DYNAMIC) then o.drawer_id=calllist_table(drawer) end
 end
 
 local draw_obj_pre=function(o)
@@ -52,20 +52,21 @@ local draw_obj_pre_alpha=function(o)
 end
 
 make_gl_canvas=function(scn,camera,w,h)
-	local cfg=scn.config or {"Config The Opengl Windows",0,0,0,"50 50 50",0,1,2,1,0,1,0}
+	local cfg=scn.config or {"Config The Opengl Windows",0,1,0,"65 105 225",1,1,2,1,1,1,1}
 	local MakeCurrent,SwapBuffer,Update=iup.GLMakeCurrent,iup.GLSwapBuffers,iup.Update
 	local isleft,ismiddle,isright,isshift=iup.isbutton1,iup.isbutton2,iup.isbutton3,iup.isshift
 	local mouse_xy={0,0}
-	local F1,UP,DOWN,LEFT,RIGHT,PGUP,PGDN=iup.K_F1,iup.K_W,iup.K_S,iup.K_A,iup.K_D,iup.K_PGUP,iup.K_PGDN
+	local F1,FORWARD,BACKWARD,LEFT,RIGHT,UP,DOWN,ZOOM_IN,ZOOM_OUT,RESET=iup.K_F1,iup.K_w,iup.K_s,iup.K_a,iup.K_d,iup.K_q,iup.K_e,iup.K_z,iup.K_x,iup.K_r
 	local init
 	
+	local step,rate=1
 	local glcanvas
 	
 	local apply_cfg=function(cfg)
 		local s,fog,a,bg,l,x,y,z,cf,mode,shade=unpack(cfg,2)
 		local op=0
 		if a==1 then op=op+API.BLEND end
-		if fog==1 then op=op+API.FOG end
+		if fog==1 then op=op+API.TEXTURE_2D end
 		if l==1 then op=op+API.LIGHTING end
 		if cf==1 then op=op+API.CULL_FACE end
 		if mode==1 then op=op+API.FILL end
@@ -103,11 +104,14 @@ make_gl_canvas=function(scn,camera,w,h)
 		resize_cb=function(o,w_,h_)
 			MakeCurrent(o)
 			API.gl_set_viewport(0,0,w_,h_)
+			API.resize_camera(camera,(h_/w_)/(h/w),1)
+			w,h=w_,h_
 			Update(o)
 		end,
 		-- mouse callbacks
 		wheel_cb=function (o,delta,x,y,status)
-			API.scale_camera(camera,delta<0 and 1.11 or 0.9)
+			rate=delta>0 and 0.9 or 1.11
+			API.scale_camera(camera,rate)
 			API.update_camera(camera)
 			Update(o)
 		end,
@@ -135,8 +139,11 @@ make_gl_canvas=function(scn,camera,w,h)
 		end,
 		-- key board callbacks
 		keypress_cb=function (o,k,pressed)
-			local step=0.02
-			API.move_camera(camera,k==LEFT and -step or k==RIGHT and step or 0, k==PGDN and step or k==PGUP and -step or 0, k==UP and -step or k==DOWN and step or 0)
+			step=0.02
+			API.move_camera(camera,k==LEFT and -step or k==RIGHT and step or 0, k==UP and step or k==DOWN and -step or 0, k==FORWARD and -step or k==BACKWARD and step or 0)
+			rate= k==ZOOM_OUT and 0.9 or k==ZOOM_IN and 1.11
+			if rate then API.resize_camera(camera,rate,rate) end
+			if k==RESET then API.set_camera_position(camera,0,0,0) end
 			API.update_camera(camera)
 			Update(o)
 			return true

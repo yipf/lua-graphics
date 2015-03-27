@@ -15,7 +15,7 @@ require 'UI/config'
 require 'UI/widgets'
 
 
-local scn=dofile(DIR.."/scn/test.lua")
+local scn=dofile(DIR.."/scn/debug-shape.lua")
 
 
 --~ local s=clib_loader"yipf-img-gl"

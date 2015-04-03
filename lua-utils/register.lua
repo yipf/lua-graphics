@@ -17,6 +17,7 @@ end
 
 drawer_hooks=make_register_table()
 texture_hooks=make_register_table()
+shader_hooks=make_register_table()
 
 local init_drawer_=function(drawer)
 	if type(drawer[1])=='function' then return drawer end
@@ -50,8 +51,15 @@ calllist_table=make_register_table(obj2callid)
 local obj2texid=function(o)
 	local f,id=texture_hooks(o[1])
 	if not f then print("Not valid texture type:",o[1]) return end
-	o[1]=f
 	return f(unpack(o,2))
 end
 
 texture_table=make_register_table(obj2texid)
+
+local shader2shaderid=function(o)
+	local f,id=shader_hooks(o[1])
+	if not f then print("Not valid shader type:",o[1]) return end
+	return f(unpack(o,2))
+end
+
+shader_table=make_register_table(shader2shaderid)

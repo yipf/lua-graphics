@@ -8,21 +8,13 @@ API=clib_loader"yipf-img-gl"
 
 require 'lua-utils/register'
 
-require 'plugin/drawers'
-require 'plugin/texture-generaters'
-
 require 'UI/config'
 require 'UI/widgets'
 
+local load_scn=function(name,path)
+	path=path or DIR.."/scn"
+	local s=string.format([[%s/%s.lua]],path,name)
+	dofile(s)
+end
 
-local scn=dofile(DIR.."/scn/debug-shape.lua")
-
-
---~ local s=clib_loader"yipf-img-gl"
-
---~ print(s.load_img)
-
---~ local img=s.load_img("data/2.png",4)
---~ print(img.data,img.x,img.y) 
-
---~ s.save_img(img,"./data/sss.png")
+load_scn"debug-shape"

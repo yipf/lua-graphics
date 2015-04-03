@@ -46,22 +46,20 @@ add,sub,dot,cross,mul,normalize=add_,sub_,dot_,cross_,mul_,normalize_
 
 -- extending functions
 
-local tangent_=function(points,name,closed)
-	name=name or "T"
+local tangent_=function(points,closed)
+	local t={}
 	local n,p=#points
 	if #points<2 then return end
-	p=points[1]
-	p[name]=sub_(points[2],closed and points[n] or p)
+	t[1]=sub_(points[2],closed and points[n] or p)
 	if n>2 then
 		for i=2,n-1 do
-			p=points[i]
-			p[name]=sub_(points[i+1],points[i-1])
+			t[i]=sub_(points[i+1],points[i-1])
 		end
 	end
-	p=points[n]
-	p[name]=sub_(closed and points[1] or p,points[n-1])
-	return points
+	t[n]=sub_(closed and points[1] or p,points[n-1])
+	return t
 end
+
 
 local transpose_=function(m)
 	local tm={}

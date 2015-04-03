@@ -1,1 +1,1 @@
-gcc ./yipf-img-gl.c -fPIC -shared -o ../clibs/yipf-img-gl.so -lGLEW -lstb 
+gcc ./*.c -fPIC -shared -o ../clibs/yipf-img-gl.so -lGLEW 

@@ -1,7 +1,9 @@
 require 'iupluagl'
 
 require 'lua-utils/strstr'
-
+require 'plugin/drawers'
+require 'plugin/texture-generaters'
+require 'plugin/shader-loaders'
 local API=API
 
 --- config btn
@@ -31,6 +33,7 @@ local init_callid_and_texture=function(o)
 	drawer=drawer and init_drawer(drawer) 
 	if texture then o.texture_id=texture_table(texture) end
 	if drawer and (not o.DYNAMIC) then o.drawer_id=calllist_table(drawer) end
+	return o
 end
 
 local draw_obj_pre=function(o)
@@ -47,9 +50,12 @@ local draw_obj_post=function(o)
 	return o
 end
 
-local draw_obj_pre_alpha=function(o)
-	
-end
+local API=API
+local light_camera=API.create_camera()
+light_camera=API.make_camera(light_camera,0,0,0,0)
+light_camera=API.set_camera_projection(light_camera,1,1000,math.rad(90),1)
+light_camera=API.update_camera(light_camera)
+
 
 make_gl_canvas=function(scn,camera,w,h)
 	local cfg=scn.config or {"Config The Opengl Windows",0,1,0,"65 105 225",1,1,2,1,1,1,1}
@@ -62,17 +68,32 @@ make_gl_canvas=function(scn,camera,w,h)
 	local step,rate=1
 	local glcanvas
 	
+	local light_shader=scn.light_shader,scn
+	local light=true
+	
 	local apply_cfg=function(cfg)
 		local s,fog,a,bg,l,x,y,z,cf,mode,shade=unpack(cfg,2)
 		local op=0
 		if a==1 then op=op+API.BLEND end
 		if fog==1 then op=op+API.TEXTURE_2D end
-		if l==1 then op=op+API.LIGHTING end
+		if l==1 then 
+			op=op+API.LIGHTING 
+			light=true
+		else
+			light=false
+		end
 		if cf==1 then op=op+API.CULL_FACE end
 		if mode==1 then op=op+API.FILL end
 		if shade==1 then op=op+API.SMOOTH end
 		API.gl_options(op)
 		API.gl_set_light(0,x,y,z,0)
+		API.set_camera_position(light_camera,x,y,z)
+		if x+z~=0 then
+			API.set_camera_direction(light_camera,-x,-y,-z,0,1,0)
+		else
+			API.set_camera_direction(light_camera,-x,-y,-z,1,0,0)
+		end
+		API.update_camera(light_camera)
 		local t=str2table(bg,"%S+",tonumber)
 		local r,g,b,a=unpack(t)
 		API.gl_set_bg_color(r or 0,g or 0,b or 0, a or 255)
@@ -82,16 +103,42 @@ make_gl_canvas=function(scn,camera,w,h)
 	glcanvas=iup.glcanvas{ buffer="DOUBLE", rastersize = w..'x'..h,
 		map_cb=function(o)
 			MakeCurrent(o)
-			if not init then API.my_init(100,100) init=true end
+			if not init then 
+				API.my_init(100,100) 
+				scn.texture_id=API.prepare_shadowmap()
+				init=true 
+			end
 			do_tree(scn,init_callid_and_texture)
+			
+			light_shader=light_shader and shader_table(light_shader) or 0
+			
 			apply_cfg(cfg) 
 			API.gl_set_viewport(0,0,w,h)
 		end,
 		action=function(o)
 			MakeCurrent(o)
 			API.gl_clear_all()
-			API.camera_look(camera)
+			if light then 
+				-- generate shadowmap
+--~ 				API.apply_shader(0) 
+--~ 				API.before_draw_shadowmap(light_camera)
+--~ 				do_tree(scn,draw_obj_pre,draw_obj_post)
+--~ 				API.after_draw_shadowmap(light_camera)
+--~ 				API.apply_shader(light_shader)
+--~ 				API.bind_shadowmap(light_camera,light_shader)
+--~ 				API.camera_look(camera)
+--~ 				API.apply_shader(0) 
+--~ 				API.apply_shader(0) 
+				API.build_shadowmap(light_camera);
+				do_tree(scn,draw_obj_pre,draw_obj_post)
+				API.bind_shadowmap(light_camera,light_shader)
+				API.camera_look(camera)
+			else
+				API.camera_look(camera)
+				API.apply_shader(0) 
+			end
 			do_tree(scn,draw_obj_pre,draw_obj_post)
+--~ 			if light then API.bind_shadowmap(light_camera) end
 --~ 			API.draw_box(2.0);
 --~ 			if alpha then
 --~ 				API.glEnable('BLEND')

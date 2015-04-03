@@ -1,5 +1,8 @@
 
+typedef int GLint;
 typedef unsigned int GLuint;
+typedef unsigned int GLenum;
+typedef unsigned int GLhandleARB;
 typedef float GLfloat;
 typedef float GLclampf;
 
@@ -49,7 +52,7 @@ unsigned int pop_texture(void);
 int my_init(unsigned int matrix_max,unsigned int texture_max);
 
 //~ typedef struct{mat4x4 cm; mat4x4 projection; mat4x4 view; vec4 target;} camera_type_;
-typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T,temp_vec4; mat4x4 projection; mat4x4 view;} camera_type_;
+typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T,temp_vec4; mat4x4 projection; mat4x4 view; mat4x4 bias;} camera_type_;
 typedef camera_type_* camera_type;
 
 camera_type create_camera(void);
@@ -61,6 +64,8 @@ camera_type scale_camera(camera_type c,scalar s);
 
 camera_type set_camera_projection(camera_type c,scalar near,scalar far,scalar fov,scalar wh);
 camera_type set_camera_position(camera_type c, scalar x, scalar y, scalar z);
+camera_type set_camera_direction(camera_type c, scalar x, scalar y, scalar z,scalar upx,scalar upy,scalar upz);
+
 camera_type resize_camera(camera_type c, scalar w, scalar h);
 
 camera_type update_camera_observe(camera_type c);
@@ -97,3 +102,20 @@ int end_draw(void);
 int set_vertex(scalar x,scalar y,scalar z,scalar tx,scalar ty, scalar nx, scalar ny, scalar nz);
 int draw_box(scalar r);
 int draw_plane(scalar r);
+
+/* shader */
+
+GLint shadowMapUniform,texUniform;
+
+GLuint shadowmapTex;
+GLuint SHADOW_MAP_WIDTH;
+GLuint SHADOW_MAP_HEIGHT;
+GLuint shadowmapFBO;
+
+GLhandleARB compile_shader(const char* string,GLenum type);
+GLhandleARB build_shader(const char* vert,const char* frag);
+GLhandleARB apply_shader(GLhandleARB shaderid);
+
+GLuint prepare_shadowmap(void);
+int build_shadowmap(camera_type light);
+int bind_shadowmap(camera_type light, GLhandleARB shader);

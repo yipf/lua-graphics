@@ -1,3 +1,75 @@
+------------------------------------------------------------------------------------------
+-- scn
+------------------------------------------------------------------------------------------
+
+require 'geo/shapes'
+require 'geo/transformers'
+
+local rad=math.rad
+
+local geo={"grid",rotate_obj(arc(rad(-90),rad(90),10),rad(0),rad(360),10,{0,1,0}),false,true}
+
+local chess={"chess",4,{160,160,160},{224,224,224}}
+
+local T=API.make_translate(T,3,0,0)
+local m5=API.make_scale(API.create_mat4x4(),1.5,1.5,1.5)
+m5=API.mult_matrix(T,m5,m5)
+
+T=API.make_translate(T,0,0,3)
+m6=API.mult_matrix(T,m5,API.create_mat4x4())
+
+T=API.make_translate(T,0,3,0)
+m7=API.mult_matrix(T,m5,API.create_mat4x4())
+
+
+T=API.make_translate(T,0,7,0)
+
+local rot1=API.make_rotate(API.create_mat4x4(),0,1,0,math.rad(5))
+local rot2=API.make_rotate(API.create_mat4x4(),1,0,0,math.rad(5))
+local rot3=API.make_rotate(API.create_mat4x4(),0,0,1,math.rad(5))
+
+
+local path={}
+
+for ang=math.rad(0),math.rad(330),math.rad(30) do
+	table.insert(path,{3+math.cos(ang),math.sin(ang),0})
+end
+
+local geo={"grid",rotate_obj(path,rad(0),rad(340),17,{0,1,0}),true,true}
+
+local scn={
+ config={"Config The Opengl Windows",0,1,0,"65 105 225",1,10,20,10,1,1,1},
+  
+  light_shader={"built-in","spot-light&shadow"},
+  
+  drawer={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua"},
+--~   drawer={"plane",30},
+  
+  { 	matrix=T,
+  {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot1,m,m)
+  end},
+  
+    {drawer=geo,texture=chess, matrix=m6,actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot2,m,m)
+  end},
+  
+	{drawer=geo,texture=chess, matrix=m7,actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot3,m,m)
+  end},
+  
+  },
+  
+
+}
+
+------------------------------------------------------------------------------------------
+-- UI
+------------------------------------------------------------------------------------------
+
 local dialog,split,frame,vbox,tabs=iup.dialog,iup.split,iup.frame,iup.vbox,iup.tabs
 
 require 'UI/gl_canvas'
@@ -8,45 +80,19 @@ camera=API.make_camera(camera,0,0,0,100)
 camera=API.set_camera_projection(camera,1,1000,math.rad(60),1)
 camera=API.update_camera(camera)
 
-require 'geo/shapes'
-require 'geo/transformers'
-
-local rad=math.rad
-
-local geo={"grid",rotate_obj(arc(rad(-90),rad(90),10),rad(0),rad(360),10,{1,1,1}),false,true}
-
-
-local box={"box",1}
-
-local T=API.make_translate(API.create_mat4x4(),1,0,0)
-
-
-local m1=API.make_scale(API.create_mat4x4(),2,0.3,0.3)
-m1=API.mult_matrix(m1,T,m1)
-
-T=API.make_translate(T,0,1,0)
-local m3=API.make_scale(API.create_mat4x4(),0.3,2,0.3)
-m3=API.mult_matrix(m3,T,m3)
-
-T=API.make_translate(T,0,0,1)
-local m4=API.make_scale(API.create_mat4x4(),0.3,0.3,2)
-m4=API.mult_matrix(m4,T,m4)
-
-local m5=API.make_scale(API.create_mat4x4(),5,5,5)
-
-local scn={
- config={"Config The Opengl Windows",0,1,0,"65 105 225",1,1,2,1,1,1,1},
-  
-  drawer={"plane",20},texture={"file","data/sss.png"},
-  
---~   {drawer=geo,texture={"chess",4,{160,160,160},{224,224,224}}, matrix=m5},
-    {drawer=box,texture={"color",{255,0,0}},matrix=m1}, --X
-  {drawer=box,texture={"color",{0,255,0}},matrix=m3},  -- Y
-  {drawer=box,texture={"color",{0,0,255}},matrix=m4},   --Z
-}
-
 local glw,gl_cfg=make_gl_canvas(scn,camera,800,800)
 local gl_panel=frame{title="GL",glw}
+
+action=function(o)
+	local f=o.actor
+	if f then f(o) end
+end
+
+local Update=iup.Update
+local timer_toggle,timer=make_timer("timer",30,function()
+    do_tree(scn,action)
+	Update(glw)
+end)
 
 -- main dialog
 
@@ -60,7 +106,7 @@ YIPF Copyright
 
 
 local tabs=tabs{ expand="yes",
- vbox{tabtitle="Operation",expand='yes',gl_cfg,toggle,laplacian_btn,load_bvh_org,load_bvh_track,load_bvh_track_static,load_bvh_track_interact,bvh_lst,bvh_lst_btn,make_space()},
+ vbox{tabtitle="Operation",expand='yes',gl_cfg,timer_toggle,make_space()},
  vbox{tabtitle="Option",expand='yes',cfg_btn,make_space()},
  vbox{tabtitle="About",expand='yes',make_space(about_str)},
 }

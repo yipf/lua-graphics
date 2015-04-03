@@ -1,5 +1,7 @@
 #include "yipf-img-gl.h"
 
+static GLint shadowMapUniform,texUniform;
+
 img_type creat_img(){
 	img_type img=(img_type)malloc(sizeof(img_type_));
 	return img;
@@ -192,7 +194,9 @@ unsigned int push_and_apply_matrix(mat4x4 m){
 
 unsigned int push_and_apply_texture(GLuint t){
 	TEXTURE_STACK[++TEXTURE_STACK_TOP]=t;
+	//~ glActiveTextureARB(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t );
+	//~ glUniform1iARB(texUniform,0);
 	return TEXTURE_STACK_TOP;
 }
 
@@ -203,6 +207,7 @@ unsigned int pop_matrix(void){
 }
 
 unsigned int pop_texture(void){
+	//~ glActiveTextureARB(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D,TEXTURE_STACK[--TEXTURE_STACK_TOP]);
 	return TEXTURE_STACK_TOP;
 }
@@ -252,6 +257,10 @@ camera_type make_camera(camera_type c, scalar x, scalar y, scalar z, scalar dist
 	/*c->view*/
 	m=create_mat4x4();
 	c->view=m;
+	/*c->bias*/
+	m=make_scale(create_mat4x4(),0.5,0.5,0.5);
+	m[12]=0.5;	m[13]=0.5; m[14]=0.5;
+	c->bias=m;
 	return c;
 }
 
@@ -321,7 +330,17 @@ camera_type set_camera_projection(camera_type c,scalar near,scalar far,scalar fo
 	return c;
 }
 
-camera_type update_camera_observe(camera_type c){
+camera_type set_camera_direction(camera_type c, scalar x, scalar y, scalar z,scalar upx,scalar upy,scalar upz){
+	vec4 X,Y,Z;
+	X=c->X; 	Y=c->Y; 	Z=c->Z; 
+	Z[0]=-x;	Z[1]=-y;	Z[2]=-z;
+	Y[0]=upx; Y[1]=upy;	Y[2]=upz;
+	cross(Y,Z,X); 	cross(Z,X,Y);
+	normalize(X); normalize(Y); normalize(Z); 
+	return c;
+}
+
+camera_type update_camera(camera_type c){
 	mat4x4 view;
 	vec4 x,y,z,t,v;
 	scalar d;
@@ -338,30 +357,12 @@ camera_type update_camera_observe(camera_type c){
 	return c;
 }
 
-camera_type update_camera_fps(camera_type c){
-	mat4x4 view;
-	view=c->view;
-	vec4 x,y,z,t;
-	scalar d;
-	x=c->X; 	y=c->Y; 	z=c->Z; 	t=c->T; 	
-	d=c->dist;
-	view[0]=x[0];		view[1]=y[0];		view[2]		=z[0];		view[3]=0;
-	view[4]=x[1];		view[5]=y[1];		view[6]		=z[1];		view[7]=0;
-	view[8]=x[2];		view[9]=y[2];		view[10]	=z[2];		view[11]=0;
-	view[12]=-t[0];	view[13]=-t[1];	view[14]=-t[2];	view[15]=1;
-	return c;
-}
-
-camera_type update_camera(camera_type c){
-	return update_camera_observe(c);
-}
-
 camera_type camera_look(camera_type c){
 	/* set projection matrix*/
 	glMatrixMode(GL_PROJECTION);
 	glLoadMatrixf(c->projection);
 	glMultMatrixf(c->view);
-	//~ /* set modelview matrix*/
+	 /* set modelview matrix*/
 	glMatrixMode(GL_MODELVIEW);
 	//~ glLoadIdentity();
 	return c;
@@ -446,7 +447,6 @@ GLuint img2texture(char const *filepath){
 		printf("Error when loading file: %s",filepath);
 		return 0;
 	}
-	printf("\n%d\t%d\t%d\%d\n",data[0],data[1],data[2],data[3]);
 	glGenTextures(1, &id);
 	glBindTexture(GL_TEXTURE_2D, id );
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
@@ -525,6 +525,115 @@ int draw_plane(scalar r){
 	glBegin(GL_QUADS);
 	set_vertex(r,0,r,0.0,0.0,0,1,0);set_vertex(r,0,-r,0.0,1.0,0,1,0);set_vertex(-r,0,-r,1.0,1.0,0,1,0);set_vertex(-r,0,r,1.0,0.0,0,1,0);
 	glEnd();
+	return 0;
+}
+
+
+GLhandleARB compile_shader(const char* string,GLenum type){
+	GLhandleARB handle;
+	GLint result;				// Compilation code result
+	GLint errorLoglength;
+	char* errorLogText;
+	GLsizei actualErrorLogLength;
+	
+	handle = glCreateShaderObjectARB(type);
+	if (!handle){
+		//We have failed creating the vertex shader object.
+		printf("Failed creating vertex shader object!");
+		return 0;
+	}
+	glShaderSourceARB(handle, 1, &string, 0);
+	glCompileShaderARB(handle);
+	//Compilation checking.
+	glGetObjectParameterivARB(handle, GL_OBJECT_COMPILE_STATUS_ARB, &result);
+	if (!result)
+	{
+		printf("Failed to compile shader:");
+		glGetObjectParameterivARB(handle, GL_OBJECT_INFO_LOG_LENGTH_ARB, &errorLoglength);
+		errorLogText = malloc(sizeof(char) * errorLoglength);
+		glGetInfoLogARB(handle, errorLoglength, &actualErrorLogLength, errorLogText);
+		printf("%s\n",errorLogText);
+		free(errorLogText);
+	}
+	return handle;
+}
+
+
+GLhandleARB build_shader(const char* vert,const char* frag){
+	GLhandleARB shadowShaderId;
+	shadowShaderId = glCreateProgramObjectARB();
+	glAttachObjectARB(shadowShaderId,vert?compile_shader(vert,GL_VERTEX_SHADER):0);
+	glAttachObjectARB(shadowShaderId,frag?compile_shader(frag,GL_FRAGMENT_SHADER):0);
+	glLinkProgramARB(shadowShaderId);
+	return shadowShaderId;
+}
+
+GLhandleARB apply_shader(GLhandleARB shaderid){
+	glUseProgramObjectARB(shaderid);
+	return shaderid;
+}
+
+
+static GLuint shadowmapTex=0;
+static GLuint SHADOW_MAP_WIDTH=2048;
+static GLuint SHADOW_MAP_HEIGHT=2048;
+static GLuint shadowmapFBO=0;
+
+GLuint prepare_shadowmap(void){
+	// generate texture
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(1, &shadowmapTex);
+	glBindTexture(GL_TEXTURE_2D, shadowmapTex );
+	//~ glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
+	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);  
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);  
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);  
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
+	// generate FBO
+	glGenFramebuffersEXT(1, &shadowmapFBO);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowmapFBO);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, shadowmapTex, 0);
+	//~ printf("%x",glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
+	// restore to normal pipeline
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	return shadowmapTex;
+}
+
+int build_shadowmap(camera_type light){
+	// draw to shadowmap texture
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowmapFBO);
+	glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT);
+	glClear( GL_DEPTH_BUFFER_BIT);
+	glViewport(0,0,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT);
+	glCullFace(GL_FRONT); // only draw back faces
+	camera_look(light);
+	glUseProgramObjectARB(0);
+	return 0;
+}
+
+int bind_shadowmap(camera_type light,GLhandleARB shader){
+	// return to normal rendering
+	glPopAttrib();
+	glCullFace(GL_BACK);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	// Go back to normal matrix mode
+	glCullFace(GL_BACK);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// apply shader and set bind TEXTURE1: shadowmap
+	glUseProgramObjectARB(shader);
+	glActiveTextureARB(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, shadowmapTex);
+	glUniform1iARB(glGetUniformLocationARB(shader,"shadowmap"),  1); 
+	glUniform1iARB(glGetUniformLocationARB(shader,"tex"),  0); 
+	// set texture matrix for texture1
+	glMatrixMode(GL_TEXTURE);
+	glLoadIdentity();	
+	glLoadMatrixf(light->bias);
+	glMultMatrixf (light->projection);
+	glMultMatrixf (light->view);
+	glActiveTextureARB(GL_TEXTURE0);
 	return 0;
 }
 

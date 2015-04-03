@@ -44,3 +44,34 @@ f=function(grid,uclosed,vclosed)
 end
 drawer_hooks("grid",f)
 
+local draw_obj_pre=function(o)
+	local m,t,d=o.matrix,o.texture,o.drawer
+	if m then API.push_and_apply_matrix(m) end
+	if t then API.push_and_apply_texture(texture_table(t)) end
+	if d then 
+		local f=drawer_hooks(d[1])
+		if f then f(unpack(d,2)) end
+	end
+end
+
+local draw_obj_post=function(o)
+	if o.texture then API.pop_texture() end
+	if o.matrix then API.pop_matrix() end
+end
+
+local draw_scn=function(scn)
+	do_tree(scn,draw_obj_pre,draw_obj_post)
+	return scn
+end
+
+drawer_hooks("scn",draw_scn)
+
+f=function(filepath)
+	print(filepath)
+	local scn=dofile(filepath)
+	print(scn)
+	scn=scn and draw_scn(scn)
+	return scn
+end
+drawer_hooks("scn-file",f)
+

@@ -495,6 +495,7 @@ int stbi_write_png(char const *filename, int x, int y, int comp, const void *dat
    FILE *f;
    int len;
    unsigned char *png = stbi_write_png_to_mem((unsigned char *) data, stride_bytes, x, y, comp, &len);
+   printf("img:%p",png);
    if (!png) return 0;
    f = fopen(filename, "wb");
    if (!f) { free(png); return 0; }

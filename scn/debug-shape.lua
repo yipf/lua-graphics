@@ -5,9 +5,18 @@
 require 'geo/shapes'
 require 'geo/transformers'
 
-local rad=math.rad
+local rad,sin,cos=math.rad,math.sin,math.cos
 
-local geo={"grid",rotate_obj(arc(rad(-90),rad(90),10),rad(0),rad(360),10,{0,1,0}),false,true}
+local geo1={"grid",rotate_obj(arc(rad(-90),rad(90),10),rad(0),rad(-360),10,{0,1,0}),false,true}
+
+local path={}
+local ang
+for i=1,72 do
+	ang=rad(i*10)
+	path[i]={cos(ang)*3,i*0.3,sin(ang)*3}
+end
+
+local geo2={"grid",path_obj(arc(rad(0),rad(9*36),9),path),true,false}
 
 local chess={"chess",4,{160,160,160},{224,224,224}}
 
@@ -46,22 +55,23 @@ local scn={
 --~   drawer={"plane",30},
   
   { 	matrix=T,
-  {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
-	  local m=o.matrix
-	  API.mult_matrix(rot1,m,m)
-  end},
-  
-    {drawer=geo,texture=chess, matrix=m6,actor=function(o)
+--~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot1,m,m)
+--~   end},
+--~   
+    {drawer=geo2,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot2,m,m)
   end},
-  
-	{drawer=geo,texture=chess, matrix=m7,actor=function(o)
-	  local m=o.matrix
-	  API.mult_matrix(rot3,m,m)
-  end},
-  
   },
+
+	{drawer=geo2,texture={"color",{255,0,0,255}},matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot1,m,m)
+  end,},
+  
+
   
 
 }

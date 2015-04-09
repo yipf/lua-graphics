@@ -18,3 +18,4 @@ local load_scn=function(name,path)
 end
 
 load_scn"debug-shape"
+--~ load_scn"debug-img"

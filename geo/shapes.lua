@@ -11,16 +11,16 @@ grid2mesh=function(grid,uclosed,vclosed) 	-- convert a point grid to a drawerabl
 	-- generate normals
 	for i,row in ipairs(grid) do
 		T=tangent(row,uclosed)
-		for i,cell in ipairs(row) do cell.U=T[i] end
+		for j,cell in ipairs(row) do cell.U=T[j] end
 	end
 	local tg=transpose(grid)
 	for i,col in ipairs(tg) do
 		T=tangent(col,vclosed)
-		for i,cell in ipairs(col) do cell.V=T[i] end
+		for j,cell in ipairs(col) do cell.V=T[j] end
 	end
 	for i,row in ipairs(grid) do
 		for i,cell in ipairs(row) do
-			cell.N=normalize(cross(cell.V,cell.U))
+			cell.N=normalize(cross(cell.U,cell.V))
 		end
 	end
 	-- set texture

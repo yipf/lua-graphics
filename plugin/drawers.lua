@@ -25,13 +25,13 @@ end
 local draw_mesh=function(mesh)
 	local r,c=#mesh,#mesh[1]
 	local r1,r2
-	local tp=API.QUAD_STRIP
+	local tp=API.TRIANGLE_STRIP
 	for i=1,r-1 do -- up to down
 		r1,r2=mesh[i],mesh[i+1]
 		API.begin_draw(tp)
 		for j=1,c do
-			set_point(r1[j])
 			set_point(r2[j])
+			set_point(r1[j])
 		end
 		API.end_draw()
 	end

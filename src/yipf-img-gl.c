@@ -2,9 +2,41 @@
 
 static GLint shadowMapUniform,texUniform;
 
-img_type creat_img(){
+img_type creat_img(unsigned int width,unsigned int height){
 	img_type img=(img_type)malloc(sizeof(img_type_));
+	img->comp=4;
+	img->data=(char*)malloc((width*height)<<2);
+	img->width=width;
+	img->height=height;
 	return img;
+}
+
+char * get_pixel(img_type img,unsigned int x, unsigned int y){
+	char *data;
+	unsigned int width,height;
+	if(!img){		return 0;	}
+	width=img->width;	height=img->height;
+	data=img->data;
+	x=x>width?width:x; 	y=y>height?height:y;
+	return data+(y*width+x)*(img->comp);
+}
+
+char* set_pixel(char* pixel,unsigned int comp, char r, char g, char b, char a){
+	if(!pixel) {return pixel;}
+	switch(comp){
+		case 4: pixel[3]=a;
+		case 3: pixel[2]=b;
+		case 2: pixel[1]=g;
+		case 1: pixel[0]=r;
+		default: break;
+	}
+	return pixel;
+}
+
+char * copy_pixel(char* dst,unsigned int dcomp, char* src,unsigned int scomp){
+	unsigned int comp=dcomp>scomp?scomp:dcomp;
+	while(comp-->0){dst[comp]=src[comp];}
+	return dst;
 }
 
 int delete_img(img_type img){
@@ -16,13 +48,14 @@ int delete_img(img_type img){
 }
 
 int save_img(img_type img,const char* filepath){
-	return  stbi_write_png (filepath, img->x, img->y, img->comp, img->data, img->stride_bytes);
+	return  stbi_write_png (filepath, img->width, img->height, img->comp, img->data, (img->width)*(img->comp));
+	return 0;
 }
 
 
 img_type load_img(char const *filepath,int req_comp){
-	img_type img=creat_img();
-	img->data=stbi_load (filepath,  &(img->x), &(img->y), &(img->comp), req_comp);
+	img_type img=creat_img(1,1);
+	img->data=stbi_load (filepath,  &(img->width), &(img->height), &(img->comp), req_comp);
 	return img;
 }
 

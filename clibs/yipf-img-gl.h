@@ -6,11 +6,13 @@ typedef unsigned int GLhandleARB;
 typedef float GLfloat;
 typedef float GLclampf;
 
-typedef void* data_type;
-typedef struct img_type_{ int x; int y; int comp; int stride_bytes; data_type data;} img_type_;
+typedef struct img_type_{ unsigned int width; unsigned int height; unsigned int comp; char* data;} img_type_;
 typedef img_type_* img_type;
 
-img_type creat_img();
+img_type creat_img(unsigned int width,unsigned int height);
+char * get_pixel(img_type img,unsigned int x, unsigned int y);
+char* set_pixel(char* pixel,unsigned int comp, char r, char g, char b, char a);
+char * copy_pixel(char* dst,unsigned int dcomp, char* src,unsigned int scomp);
 int delete_img(img_type img);
 int save_img(img_type img,const char* filepath);
 img_type load_img(char const *filepath,int req_comp);

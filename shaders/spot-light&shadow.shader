@@ -3,7 +3,7 @@
 -- http://blog.csdn.net/hgl868/article/details/7872414
 
 vert=[[
-varying vec3 normal, lightDir;
+varying vec3 normal, lightDir,eyeVec;
 varying float dist;
 varying vec4 ShadowCoord;
 
@@ -31,13 +31,14 @@ void main (void){
 	float distanceFromLight = shadowTexel.z;
  	float shadow = 1.0;
  	if (ShadowCoord.w > 0.0) shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
+	// compute color factor
+	float f = dot(normalize(normal),normalize(lightDir));
+	f=f>0.0?f:0.0; // 1/k1+k1*d+k2*d^2
 	// spot light
 	float x=shadowCoordinateWdivide.x*2.0-1.0;
 	float y=shadowCoordinateWdivide.y*2.0-1.0;
 	if((x*x+y*y)>1.0) {shadow=0.5;}
-	// compute color factor
-	float f = dot(normalize(normal),normalize(lightDir));
-	f=f>0.0?f:0.0;
+
 	
 	// compute final color
 	gl_FragColor=shadow*f*texture2D(tex,gl_TexCoord[0].st);  

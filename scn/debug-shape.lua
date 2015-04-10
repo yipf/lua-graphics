@@ -47,7 +47,7 @@ end
 local geo={"grid",rotate_obj(path,rad(0),rad(340),17,{0,1,0}),true,true}
 
 local scn={
- config={"Config The Opengl Windows",0,1,0,"65 105 225",1,10,20,10,1,1,1},
+ config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,0,1,1},
   
   light_shader={"built-in","spot-light&shadow"},
   

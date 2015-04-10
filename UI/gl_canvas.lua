@@ -68,8 +68,10 @@ make_gl_canvas=function(scn,camera,w,h)
 	local step,rate=1
 	local glcanvas
 	
-	local light_shader=scn.light_shader,scn
+	local light_shader=scn.light_shader
 	local light=true
+	
+	local shadow_render
 	
 	local apply_cfg=function(cfg)
 		local s,fog,a,bg,l,x,y,z,cf,mode,shade=unpack(cfg,2)
@@ -105,7 +107,9 @@ make_gl_canvas=function(scn,camera,w,h)
 			MakeCurrent(o)
 			if not init then 
 				API.my_init(100,100) 
-				scn.texture_id=API.prepare_shadowmap()
+--~ 				scn.texture_id=API.prepare_shadowmap()
+				shadow_render=API.create_render(2048,2048,API.DEPTH)
+				print(shadow_render.FBO,shadow_render.depth_tex,shadow_render.color_tex)
 				init=true 
 			end
 			do_tree(scn,init_callid_and_texture)
@@ -129,9 +133,9 @@ make_gl_canvas=function(scn,camera,w,h)
 --~ 				API.camera_look(camera)
 --~ 				API.apply_shader(0) 
 --~ 				API.apply_shader(0) 
-				API.build_shadowmap(light_camera);
+				API.build_shadowmap(light_camera,shadow_render);
 				do_tree(scn,draw_obj_pre,draw_obj_post)
-				API.bind_shadowmap(light_camera,light_shader)
+				API.bind_shadowmap(light_camera,light_shader,shadow_render)
 				API.camera_look(camera)
 			else
 				API.camera_look(camera)

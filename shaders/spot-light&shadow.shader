@@ -28,7 +28,8 @@ void main (void){
 	// compute shadow fact
 	vec4 shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
 	vec4 shadowTexel=texture2D(shadowmap,shadowCoordinateWdivide.st);
-	float distanceFromLight = shadowTexel.z;
+	float distanceFromLight = shadowTexel.z*(1.0005);
+	//~ float distanceFromLight = shadowTexel.z;
  	float shadow = 1.0;
  	if (ShadowCoord.w > 0.0) shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
 	// compute color factor

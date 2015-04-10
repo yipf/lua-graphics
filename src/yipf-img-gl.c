@@ -612,31 +612,55 @@ static GLuint SHADOW_MAP_WIDTH=2048;
 static GLuint SHADOW_MAP_HEIGHT=2048;
 static GLuint shadowmapFBO=0;
 
-GLuint prepare_shadowmap(void){
-	// generate texture
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &shadowmapTex);
-	glBindTexture(GL_TEXTURE_2D, shadowmapTex );
-	//~ glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
-	// GL_LINEAR does not make sense for depth texture. However, next tutorial shows usage of GL_LINEAR and PCF
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);  
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);  
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);  
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
-	// generate FBO
-	glGenFramebuffersEXT(1, &shadowmapFBO);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowmapFBO);
-	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, shadowmapTex, 0);
-	//~ printf("%x",glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT));
-	// restore to normal pipeline
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-	return shadowmapTex;
+
+
+render_type create_render(GLuint width, GLuint height,int render_mode){
+	render_type r;
+	r=(render_type)malloc(sizeof(render_type_));
+	glGenFramebuffersEXT(1, &(r->FBO));
+	r->depth_tex=0;
+	r->color_tex=0;
+	return resize_tex(r,width,height,render_mode);
 }
 
-int build_shadowmap(camera_type light){
+render_type resize_tex(render_type r,GLuint width, GLuint height,int render_mode){
+	glEnable(GL_TEXTURE_2D);
+	if(render_mode&DEPTH){
+		if(r->depth_tex) glDeleteTextures(1,&(r->depth_tex));
+		glGenTextures(1, &(r->depth_tex));
+		glBindTexture(GL_TEXTURE_2D, (r->depth_tex) );
+		glTexImage2D(GL_TEXTURE_2D,0,GL_DEPTH_COMPONENT,width,height,0,GL_DEPTH_COMPONENT,GL_UNSIGNED_BYTE,NULL);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
+	}
+	if(render_mode&COLOR){
+		if(r->color_tex) glDeleteTextures(1,&(r->color_tex));
+		glGenTextures(1, &(r->color_tex));
+		glBindTexture(GL_TEXTURE_2D, (r->color_tex) );
+		glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,width,height,0,GL_RGBA,GL_UNSIGNED_BYTE,NULL);
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR);  
+		glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR);  
+	}
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, r->FBO);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, r->depth_tex, 0);
+	glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, r->color_tex, 0); 
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	return r;
+}
+
+render_type apply_render(render_type r){
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, r?(r->FBO):0);
+	return r;
+}
+
+int build_shadowmap(camera_type light,render_type r){
 	// draw to shadowmap texture
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowmapFBO);
+	//~ glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, shadowmapFBO);
+	apply_render(r);
 	glPushAttrib(GL_VIEWPORT_BIT | GL_COLOR_BUFFER_BIT);
 	glClear( GL_DEPTH_BUFFER_BIT);
 	glViewport(0,0,SHADOW_MAP_WIDTH,SHADOW_MAP_HEIGHT);
@@ -646,7 +670,7 @@ int build_shadowmap(camera_type light){
 	return 0;
 }
 
-int bind_shadowmap(camera_type light,GLhandleARB shader){
+int bind_shadowmap(camera_type light,GLhandleARB shader,render_type r){
 	// return to normal rendering
 	glPopAttrib();
 	glCullFace(GL_BACK);
@@ -657,7 +681,8 @@ int bind_shadowmap(camera_type light,GLhandleARB shader){
 	// apply shader and set bind TEXTURE1: shadowmap
 	glUseProgramObjectARB(shader);
 	glActiveTextureARB(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, shadowmapTex);
+	//~ glBindTexture(GL_TEXTURE_2D, shadowmapTex);
+	glBindTexture(GL_TEXTURE_2D, r->depth_tex);
 	glUniform1iARB(glGetUniformLocationARB(shader,"shadowmap"),  1); 
 	glUniform1iARB(glGetUniformLocationARB(shader,"tex"),  0); 
 	// set texture matrix for texture1

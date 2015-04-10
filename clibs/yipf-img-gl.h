@@ -1,10 +1,22 @@
 
-typedef int GLint;
-typedef unsigned int GLuint;
 typedef unsigned int GLenum;
-typedef unsigned int GLhandleARB;
+typedef unsigned int GLbitfield;
+typedef unsigned int GLuint;
+typedef int GLint;
+typedef int GLsizei;
+typedef unsigned char GLboolean;
+typedef signed char GLbyte;
+typedef short GLshort;
+typedef unsigned char GLubyte;
+typedef unsigned short GLushort;
+typedef unsigned long GLulong;
 typedef float GLfloat;
 typedef float GLclampf;
+typedef double GLdouble;
+typedef double GLclampd;
+typedef void GLvoid;
+
+typedef unsigned int GLhandleARB;
 
 typedef struct img_type_{ unsigned int width; unsigned int height; unsigned int comp; char* data;} img_type_;
 typedef img_type_* img_type;
@@ -107,17 +119,25 @@ int draw_plane(scalar r);
 
 /* shader */
 
-GLint shadowMapUniform,texUniform;
-
-GLuint shadowmapTex;
-GLuint SHADOW_MAP_WIDTH;
-GLuint SHADOW_MAP_HEIGHT;
-GLuint shadowmapFBO;
-
 GLhandleARB compile_shader(const char* string,GLenum type);
 GLhandleARB build_shader(const char* vert,const char* frag);
 GLhandleARB apply_shader(GLhandleARB shaderid);
 
+//~ GLuint prepare_shadowmap(void);
+//~ int build_shadowmap(camera_type light);
+//~ int bind_shadowmap(camera_type light, GLhandleARB shader);
+
+
+typedef struct{GLuint FBO; GLuint depth_tex; GLuint color_tex;} render_type_;
+typedef render_type_* render_type;
+
+enum{DEPTH=1,COLOR=2};
+
+render_type create_render(GLuint width, GLuint height,int render_mode);
+render_type resize_tex(render_type r,GLuint width, GLuint width,int render_mode);
+render_type apply_render(render_type r);
+
+
 GLuint prepare_shadowmap(void);
-int build_shadowmap(camera_type light);
-int bind_shadowmap(camera_type light, GLhandleARB shader);
+int build_shadowmap(camera_type light,render_type r);
+int bind_shadowmap(camera_type light, GLhandleARB shader,render_type r);

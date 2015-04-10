@@ -121,17 +121,21 @@ int draw_box(scalar r);
 int draw_plane(scalar r);
 
 /* shader */
-static GLint shadowMapUniform,texUniform;
-
-static GLuint shadowmapTex;
-static GLuint SHADOW_MAP_WIDTH;
-static GLuint SHADOW_MAP_HEIGHT;
-static GLuint shadowmapFBO;
 
 GLhandleARB compile_shader(const char* string,GLenum type);
 GLhandleARB build_shader(const char* vert,const char* frag);
 GLhandleARB apply_shader(GLhandleARB shaderid);
 
+typedef struct{GLuint FBO; GLuint depth_tex; GLuint color_tex;} render_type_;
+typedef render_type_* render_type;
+
+enum{DEPTH=1,COLOR=2};
+
+render_type create_render(GLuint width, GLuint height,int render_mode);
+render_type resize_tex(render_type r,GLuint width, GLuint height,int render_mode);
+render_type apply_render(render_type r);
+
+
 GLuint prepare_shadowmap(void);
-int build_shadowmap(camera_type light);
-int bind_shadowmap(camera_type light, GLhandleARB shader);
+int build_shadowmap(camera_type light,render_type r);
+int bind_shadowmap(camera_type light, GLhandleARB shader,render_type r);

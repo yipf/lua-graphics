@@ -67,10 +67,14 @@ end
 drawer_hooks("scn",draw_scn)
 
 f=function(filepath)
-	print(filepath)
-	local scn=dofile(filepath)
-	print(scn)
-	scn=scn and draw_scn(scn)
+	print("Loading",filepath,"...")
+	local state,scn=pcall(dofile,filepath)
+	if state then
+		print("Success!")
+		draw_scn(scn)
+	else
+		print(scn) 	-- print error msg
+	end
 	return scn
 end
 drawer_hooks("scn-file",f)

@@ -124,4 +124,15 @@ end
 
 table2vector,vector2table,vector2vector,build_coord_XYZT=table2vector_,vector2table_,vector2vector_,build_coord_XYZT_
 
+samples=function(s,e,n)
+	n=n or 1
+	local t={s}
+	local d=(e-s)/n
+	for i=1,n do
+		t[i+1]=s+i*d
+	end
+	return t
+end
+
+
 

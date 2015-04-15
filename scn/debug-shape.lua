@@ -31,11 +31,12 @@ T=API.make_translate(T,0,3,0)
 m7=API.mult_matrix(T,m5,API.create_mat4x4())
 
 
-T=API.make_translate(T,0,7,0)
+T=API.make_translate(T,0,10,10)
 
 local rot1=API.make_rotate(API.create_mat4x4(),0,1,0,math.rad(5))
 local rot2=API.make_rotate(API.create_mat4x4(),1,0,0,math.rad(5))
 local rot3=API.make_rotate(API.create_mat4x4(),0,0,1,math.rad(5))
+local rot31=API.make_rotate(API.create_mat4x4(),0,0,1,math.rad(-5))
 
 
 local path={}
@@ -46,6 +47,9 @@ end
 
 local geo={"grid",rotate_obj(path,rad(0),rad(340),17,{0,1,0}),true,true}
 
+
+local wheel={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/wheels.lua"}
+
 local scn={
  config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,0,1,1},
   
@@ -54,24 +58,64 @@ local scn={
   drawer={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua"},
 --~   drawer={"plane",30},
   
-  { 	matrix=T,
+  { 	matrix=API.make_translate(API.create_mat4x4(),0,10,10),
 --~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
 --~ 	  local m=o.matrix
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=geo2,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
-	  API.mult_matrix(rot2,m,m)
+	  API.mult_matrix(rot3,m,m)
   end},
+  
+  },
+  
+    { 	matrix=API.make_translate(API.create_mat4x4(),7,10,10),
+--~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot1,m,m)
+--~   end},
+--~   
+    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot31,m,m)
+  end},
+  
   },
 
-	{drawer=geo2,texture={"color",{255,0,0,255}},matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+      { 	matrix=API.make_translate(API.create_mat4x4(),7,17,10),
+--~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot1,m,m)
+--~   end},
+--~   
+    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
-	  API.mult_matrix(rot1,m,m)
-  end,},
+	  API.mult_matrix(rot3,m,m)
+  end},
+  },
+        { 	matrix=API.make_translate(API.create_mat4x4(),0,17,10),
+--~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot1,m,m)
+--~   end},
+--~   
+    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+	  local m=o.matrix
+	  API.mult_matrix(rot31,m,m)
+  end},
+  
+  
+  },
+  
+--~ 	{drawer=wheel,texture={"color",{255,0,0,255}},matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot1,m,m)
+--~   end,},
   
 
+   
   
 
 }

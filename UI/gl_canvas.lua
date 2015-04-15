@@ -107,9 +107,7 @@ make_gl_canvas=function(scn,camera,w,h)
 			MakeCurrent(o)
 			if not init then 
 				API.my_init(100,100) 
---~ 				scn.texture_id=API.prepare_shadowmap()
 				shadow_render=API.create_render(2048,2048,API.DEPTH)
-				print(shadow_render.FBO,shadow_render.depth_tex,shadow_render.color_tex)
 				init=true 
 			end
 			do_tree(scn,init_callid_and_texture)
@@ -123,16 +121,6 @@ make_gl_canvas=function(scn,camera,w,h)
 			MakeCurrent(o)
 			API.gl_clear_all()
 			if light then 
-				-- generate shadowmap
---~ 				API.apply_shader(0) 
---~ 				API.before_draw_shadowmap(light_camera)
---~ 				do_tree(scn,draw_obj_pre,draw_obj_post)
---~ 				API.after_draw_shadowmap(light_camera)
---~ 				API.apply_shader(light_shader)
---~ 				API.bind_shadowmap(light_camera,light_shader)
---~ 				API.camera_look(camera)
---~ 				API.apply_shader(0) 
---~ 				API.apply_shader(0) 
 				API.build_shadowmap(light_camera,shadow_render);
 				do_tree(scn,draw_obj_pre,draw_obj_post)
 				API.bind_shadowmap(light_camera,light_shader,shadow_render)

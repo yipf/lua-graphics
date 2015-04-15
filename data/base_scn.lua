@@ -17,7 +17,8 @@ m4=API.mult_matrix(m4,T,m4)
 
 return {
  {drawer={"plane",30},texture=chess},
- {drawer=box,texture={"color",{255,0,0}},matrix=m1}, --X
+ {matrix=API.make_translate(API.create_mat4x4(),0,0.3,0),
+   {drawer=box,texture={"color",{255,0,0}},matrix=m1}, --X
   {drawer=box,texture={"color",{0,255,0}},matrix=m3},  -- Y
   {drawer=box,texture={"color",{0,0,255}},matrix=m4},   --Z
-}
+},}

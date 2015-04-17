@@ -113,7 +113,7 @@ local vector2vector_=function(vec,coord)
 end
 
 local build_coord_XYZT_=function(X,Y,Z,T,coord)
-	coord=coord or API.create_matrix()
+	coord=coord or API.create_mat4x4()
 	coord[0]=X[1]	coord[1]=X[2]	coord[2]=X[3]	coord[3]=0
 	coord[4]=Y[1]	coord[5]=Y[2]	coord[6]=Y[3]	coord[7]=0
 	coord[8]=Z[1]	coord[9]=Z[2]	coord[10]=Z[3]	coord[11]=0

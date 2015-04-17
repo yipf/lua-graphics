@@ -2,7 +2,7 @@
 
 static GLint shadowMapUniform,texUniform;
 
-img_type creat_img(unsigned int width,unsigned int height){
+img_type create_img(unsigned int width,unsigned int height){
 	img_type img=(img_type)malloc(sizeof(img_type_));
 	img->comp=4;
 	img->data=(char*)malloc((width*height)<<2);
@@ -54,7 +54,7 @@ int save_img(img_type img,const char* filepath){
 
 
 img_type load_img(char const *filepath,int req_comp){
-	img_type img=creat_img(1,1);
+	img_type img=create_img(1,1);
 	img->data=stbi_load (filepath,  &(img->width), &(img->height), &(img->comp), req_comp);
 	return img;
 }
@@ -560,7 +560,6 @@ int draw_plane(scalar r){
 	glEnd();
 	return 0;
 }
-
 
 GLhandleARB compile_shader(const char* string,GLenum type){
 	GLhandleARB handle;

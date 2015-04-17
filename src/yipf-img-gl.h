@@ -11,7 +11,7 @@
 typedef struct img_type_{ unsigned int width; unsigned int height; unsigned int comp; char* data;} img_type_;
 typedef img_type_* img_type;
 
-img_type creat_img(unsigned int width,unsigned int height);
+img_type create_img(unsigned int width,unsigned int height);
 char * get_pixel(img_type img,unsigned int x, unsigned int y);
 char* set_pixel(char* pixel,unsigned int comp, char r, char g, char b, char a);
 char * copy_pixel(char* dst,unsigned int dcomp, char* src,unsigned int scomp);

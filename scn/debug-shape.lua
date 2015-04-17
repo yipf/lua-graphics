@@ -50,6 +50,11 @@ local geo={"grid",rotate_obj(path,rad(0),rad(340),17,{0,1,0}),true,true}
 
 local wheel={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/wheels.lua"}
 
+local sphere={"sphere",5,nil,nil,nil,0,math.rad(180),-math.rad(30),math.rad(30)}
+
+
+local stick={"stick",{-10,5,10},{10,5,-10}}
+
 local scn={
  config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,0,1,1},
   
@@ -90,7 +95,7 @@ local scn={
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=stick,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot3,m,m)
   end},
@@ -101,7 +106,7 @@ local scn={
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=sphere,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot31,m,m)
   end},

@@ -79,3 +79,64 @@ f=function(filepath)
 end
 drawer_hooks("scn-file",f)
 
+f=function(r,c,u,v,su,eu,sv,ev)
+ 	local sin,cos,rad=math.sin,math.cos,math.rad
+	u,v=u or 20,v or 10
+	c=c or {0,0,0}
+	r=r or 1
+	su,eu=su or 0,eu or rad(360)
+	sv,ev=sv or rad(-90),ev or rad(90)
+	local push=table.insert
+	local us=samples(su,eu,u)
+	local vs=samples(sv,ev,v)
+	local du,dv=1/u,1/v
+	local x,y,z=unpack(c)
+	local dx,dy,dz
+	local mesh={}
+	for i,va in ipairs(vs) do
+		r={}
+		for j,ua in ipairs(us) do
+			dx,dy,dz=cos(va)*cos(ua),sin(va),-cos(va)*sin(ua)
+			r[j]={x+dx,y+dy,z+dz,N={dx,dy,dz},T={(j-1)*du,(i-1)*dv}}
+		end
+		mesh[i]=r
+	end
+	return draw_mesh(mesh)
+end
+drawer_hooks("sphere",f)
+
+local stick_coord
+f=function(from,to,r,n)
+	local v=sub(to,from)
+	local length=math.sqrt(dot(v,v))
+	v=normalize(v)
+	local Z,X,Y=v,{1,0,0}
+	if eq(Z,X) then X={0,0,Z[1]>0 and -1 or 1} end
+	Y=cross(Z,X)
+	X=cross(Y,Z)
+	stick_coord=build_coord_XYZT(normalize(X),normalize(Y),Z,from,stick_coord)
+	local sin,cos,rad=math.sin,math.cos,math.rad
+	r=r or 1
+	n=n or 10
+	local angs=samples(0,rad(360),n)
+	local x,y,u,dx,dy
+	API.push_and_apply_matrix(stick_coord)
+	API.begin_draw(API.TRIANGLE_STRIP)
+	for i,ang in ipairs(angs) do
+		dx,dy=cos(ang),sin(ang)
+		x,y,u=r*dx,r*dy,(i-1)/n
+		API.set_vertex(x,y,length,u,1,dx,dy,0)
+		API.set_vertex(x,y,0,u,0,dx,dy,0)
+	end
+	API.end_draw()
+	API.pop_matrix()
+end
+drawer_hooks("stick",f)
+
+-- http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline
+
+f=function()
+	
+end
+drawer_hooks("NURBS",f)
+

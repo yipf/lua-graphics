@@ -92,7 +92,7 @@ end
 
 tangent,transpose=tangent_,transpose_
 
-local temp_vec=API.create_vec4(0,0,0)
+
 
 local table2vector_=function(t,v)
 	if not v then return API.create_vec4(t[1],t[2],t[3]) end
@@ -106,6 +106,7 @@ local vector2table_=function(v,t)
 	return t
 end
 
+local temp_vec=API.create_vec4(0,0,0)
 local vector2vector_=function(vec,coord)
 	vec=table2vector_(vec,temp_vec)
 	vec=API.apply_mat(coord,vec,vec)

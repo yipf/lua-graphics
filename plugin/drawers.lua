@@ -133,10 +133,18 @@ f=function(from,to,r,n)
 end
 drawer_hooks("stick",f)
 
--- http://en.wikipedia.org/wiki/Non-uniform_rational_B-spline
+require "plugin/nurbs"
 
-f=function()
-	
+f=function(control_grid,u_knots,v_knots)
+	local grid=make_nurbs_surface(control_grid)
+	print("NURBS:",#grid,#grid[1])
+--~ 	for i,row in ipairs(grid) do
+--~ 		for j,v in ipairs(row) do
+--~ 			print(i,j,":",unpack(v))
+--~ 		end
+--~ 	end
+	local mesh=grid2mesh(grid)
+	return draw_mesh(mesh)
 end
 drawer_hooks("NURBS",f)
 

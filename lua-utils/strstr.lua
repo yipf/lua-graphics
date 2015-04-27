@@ -14,3 +14,9 @@ str2table=function(str,pat,map_f)
 	end
 	return t
 end
+
+
+path2DirNameExt=function(str)
+	local dir,name,ext=string.match(str,"^(.-/*)([^/]*)%.(.-)$")
+	return dir,name,ext
+end

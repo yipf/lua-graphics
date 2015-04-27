@@ -55,13 +55,13 @@ mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst);
 vec4 apply_mat(mat4x4 m,vec4 v, vec4 result);/* v=m*v1 */
 void print_matrix(mat4x4 m);
 /* OpenGL helper*/
-unsigned int push_and_apply_matrix(mat4x4 m);
+mat4x4 push_and_apply_matrix(mat4x4 m);
 
-unsigned int push_and_apply_texture(GLuint t);
+GLuint push_and_apply_texture(GLuint t);
 
-unsigned int pop_matrix(void);
+mat4x4 pop_matrix(void);
 
-unsigned int pop_texture(void);
+GLuint pop_texture(void);
 
 int my_init(unsigned int matrix_max,unsigned int texture_max);
 

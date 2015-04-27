@@ -52,6 +52,20 @@ local wheel={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/wheels.lua"}
 
 local sphere={"sphere",5,nil,nil,nil,0,math.rad(180),-math.rad(30),math.rad(30)}
 
+local grid={}
+
+local s=5
+
+for i=1,5 do
+	row={}
+	for j=1,5 do
+		row[j]={(j-1)*s,math.mod(i+j,2)*s,(1-i)*s}
+	end
+	grid[i]=row
+end
+
+local surface={"NURBS",grid}
+local surface1={"grid",grid}
 
 local stick={"stick",{-10,5,10},{10,5,-10}}
 
@@ -89,17 +103,21 @@ local scn={
   
   },
 
-      { 	matrix=API.make_translate(API.create_mat4x4(),7,17,10),
+--~       { 	matrix=API.make_translate(API.create_mat4x4(),7,17,10),
 --~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
 --~ 	  local m=o.matrix
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=stick,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
-	  local m=o.matrix
-	  API.mult_matrix(rot3,m,m)
-  end},
-  },
+--~     {drawer=stick,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+--~ 	  local m=o.matrix
+--~ 	  API.mult_matrix(rot3,m,m)
+--~   end},
+--~   },
+   { 	matrix=API.make_translate(API.create_mat4x4(),0,5,0),
+		{texture=chess,drawer=surface,},
+--~ 		{texture={"color",{0,255,0}},	drawer=surface1,},
+	},
         { 	matrix=API.make_translate(API.create_mat4x4(),0,17,10),
 --~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
 --~ 	  local m=o.matrix

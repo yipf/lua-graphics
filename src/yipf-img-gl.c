@@ -218,31 +218,35 @@ static scalar PI=3.1415926535898;
 static scalar D_PI=6.2831853071796;
 
 
-unsigned int push_and_apply_matrix(mat4x4 m){
-	glGetFloatv(GL_MODELVIEW_MATRIX,MATRIX_STACK+(MATRIX_STACK_TOP<<4));
+mat4x4 push_and_apply_matrix(mat4x4 m){
+	mat4x4 top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
+	glGetFloatv(GL_MODELVIEW_MATRIX,top_matrix);
 	++MATRIX_STACK_TOP;
 	glMultMatrixf(m);
-	return MATRIX_STACK_TOP;
+	return top_matrix;
 }
 
-unsigned int push_and_apply_texture(GLuint t){
+mat4x4 pop_matrix(void){
+	mat4x4 top_matrix;
+	--MATRIX_STACK_TOP;
+	top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
+	glLoadMatrixf(top_matrix);
+	return top_matrix;
+}
+
+GLuint push_and_apply_texture(GLuint t){
 	TEXTURE_STACK[++TEXTURE_STACK_TOP]=t;
 	//~ glActiveTextureARB(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, t );
 	//~ glUniform1iARB(texUniform,0);
-	return TEXTURE_STACK_TOP;
+	return t;
 }
 
-unsigned int pop_matrix(void){
-	--MATRIX_STACK_TOP;
-	glLoadMatrixf(MATRIX_STACK+(MATRIX_STACK_TOP<<4));
-	return MATRIX_STACK_TOP;
-}
-
-unsigned int pop_texture(void){
+GLuint pop_texture(void){
 	//~ glActiveTextureARB(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D,TEXTURE_STACK[--TEXTURE_STACK_TOP]);
-	return TEXTURE_STACK_TOP;
+	GLuint id=TEXTURE_STACK[--TEXTURE_STACK_TOP];
+	glBindTexture(GL_TEXTURE_2D,id);
+	return id;
 }
 
 int my_init(unsigned int matrix_max,unsigned int texture_max){
@@ -694,4 +698,21 @@ int bind_shadowmap(camera_type light,GLhandleARB shader,render_type r){
 	return 0;
 }
 
+scalar* make_vector_n(index_t n){
+	return (scalar*)malloc(n*sizeof(scalar));
+}
 
+scalar* make_knots(index_t n,index_t p){
+	index_t i,length;
+	if(n<=p){
+		return 0;
+	}
+	length=n+p+1;
+	scalar* knots=make_vector_n(length);
+	for(i=0;i<p+1;i++) knots[i]=0;
+	for(i=p+1;i<;i++) knots[i]=i-p;
+	for(i=0;i<p+1;i++) knots[length-i-1]=0;
+	return knots;
+}
+unsigned int find_span(index_t n,index_t p,scalar u,scalar* knots);
+scalar* compute_N(scalar u,index_t p, scalar * knots,scalar * N);

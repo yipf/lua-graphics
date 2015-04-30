@@ -55,15 +55,22 @@ mat4x4 clone_mat4x4(mat4x4 src,mat4x4 dst);
 vec4 apply_mat(mat4x4 m,vec4 v, vec4 result);/* v=m*v1 */
 void print_matrix(mat4x4 m);
 /* OpenGL helper*/
+//~ mat4x4 push_and_apply_matrix(mat4x4 m);
+
+//~ GLuint push_and_apply_texture(GLuint t);
+
+//~ mat4x4 pop_matrix(void);
+
+//~ GLuint pop_texture(void);
+
+//~ int my_init(unsigned int matrix_max,unsigned int texture_max);
+
+
 mat4x4 push_and_apply_matrix(mat4x4 m);
+GLuint apply_texture(GLuint tid);
+void pop_matrix(void);
 
-GLuint push_and_apply_texture(GLuint t);
-
-mat4x4 pop_matrix(void);
-
-GLuint pop_texture(void);
-
-int my_init(unsigned int matrix_max,unsigned int texture_max);
+int my_init(void);
 
 //~ typedef struct{mat4x4 cm; mat4x4 projection; mat4x4 view; vec4 target;} camera_type_;
 typedef struct{ scalar h,v,dist; vec4 X,Y,Z,T,temp_vec4; mat4x4 projection; mat4x4 view; mat4x4 bias;} camera_type_;

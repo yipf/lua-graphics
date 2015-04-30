@@ -19,26 +19,32 @@ drawer_hooks=make_register_table()
 texture_hooks=make_register_table()
 shader_hooks=make_register_table()
 
-local pcall,unpack=pcall,unpack
-
-local direct_draw_=function(d)
-	local key=d[1]
-	local hook=drawer_hooks(key)
-	if hook then 
-		pcall(hook,unpack(d,2))
-	else
-		print("No drawer defined for type:",key)
+local init_drawer_=function(drawer)
+	if type(drawer[1])=='function' then return drawer end
+	local f=drawer and drawer_hooks(drawer[1])
+	if drawer and not f then 
+		print("Not valid drawer type:",drawer[1]) 
+		return 
 	end
+	drawer[1]=f
+	return drawer
 end
 
+local pcall,unpack=pcall,unpack
+
+local draw_direct_=function(d)
+	pcall(unpack(d))
+end
+
+init_drawer,draw_direct=init_drawer_, draw_direct_
+
 local obj2callid=function(o)
+	if type(o[1])~='function'  then return end 	-- test drawer to know if it is drawable
 	id=API.begin_gen_calllist()
-	direct_draw_(o)
+	draw_direct_(o)
 	API.end_gen_calllist()
 	return id
 end
-
-direct_draw=direct_draw_
 
 calllist_table=make_register_table(obj2callid)
 

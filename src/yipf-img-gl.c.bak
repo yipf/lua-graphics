@@ -218,42 +218,44 @@ static scalar PI=3.1415926535898;
 static scalar D_PI=6.2831853071796;
 
 
-//~ mat4x4 push_and_apply_matrix(mat4x4 m){
-	//~ mat4x4 top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
-	//~ glGetFloatv(GL_MODELVIEW_MATRIX,top_matrix);
-	//~ ++MATRIX_STACK_TOP;
-	//~ glMultMatrixf(m);
-	//~ return top_matrix;
-//~ }
-
-//~ mat4x4 pop_matrix(void){
-	//~ mat4x4 top_matrix;
-	//~ --MATRIX_STACK_TOP;
-	//~ top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
-	//~ glLoadMatrixf(top_matrix);
-	//~ return top_matrix;
-//~ }
-
-GLuint apply_texture(GLuint tid){
-	glBindTexture(GL_TEXTURE_2D,tid);
-	return tid;
-}
-
 mat4x4 push_and_apply_matrix(mat4x4 m){
-	glPushMatrix();
+	mat4x4 top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
+	glGetFloatv(GL_MODELVIEW_MATRIX,top_matrix);
+	++MATRIX_STACK_TOP;
 	glMultMatrixf(m);
-	return m;
+	return top_matrix;
 }
 
-void pop_matrix(void){
-	glPopMatrix();
+mat4x4 pop_matrix(void){
+	mat4x4 top_matrix;
+	--MATRIX_STACK_TOP;
+	top_matrix=MATRIX_STACK+(MATRIX_STACK_TOP<<4);
+	glLoadMatrixf(top_matrix);
+	return top_matrix;
 }
 
-//~ int my_init(unsigned int matrix_max,unsigned int texture_max){
-int my_init(void){
+GLuint push_and_apply_texture(GLuint t){
+	TEXTURE_STACK[++TEXTURE_STACK_TOP]=t;
+	//~ glActiveTextureARB(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, t );
+	//~ glUniform1iARB(texUniform,0);
+	return t;
+}
+
+GLuint pop_texture(void){
+	//~ glActiveTextureARB(GL_TEXTURE0);
+	GLuint id=TEXTURE_STACK[--TEXTURE_STACK_TOP];
+	glBindTexture(GL_TEXTURE_2D,id);
+	return id;
+}
+
+int my_init(unsigned int matrix_max,unsigned int texture_max){
+//~ int my_init(void){
 	GLenum glew_state;
 	glew_state=glewInit();
 	if(GLEW_OK!=glew_state) {printf("Error Loading GLEW: %d",GLEW_OK);return 1;}
+	MATRIX_STACK=(scalar*)malloc(sizeof(scalar)*16*matrix_max);
+	TEXTURE_STACK=(GLuint*)malloc(sizeof(GLuint)*texture_max);
 	MATRIX_STACK_TOP=0;
 	TEXTURE_STACK_TOP=0;
 	glClearDepth(1.0);            // Depth Buffer Setup

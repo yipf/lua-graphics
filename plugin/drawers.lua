@@ -1,5 +1,7 @@
 -- basic geos
 
+require "lua-utils/register"
+
 local f=function(r)
 	API.draw_box(r or 2)
 end
@@ -44,23 +46,25 @@ f=function(grid,uclosed,vclosed)
 end
 drawer_hooks("grid",f)
 
-local draw_obj_pre=function(o)
-	local m,t,d=o.matrix,o.texture,o.drawer
+local direct_draw=direct_draw
+
+require "render/render_funcs"
+
+local draw_obj_pre_=function(o)
+	local m,d,t=o.matrix,o.drawer,o.material
 	if m then API.push_and_apply_matrix(m) end
-	if t then API.push_and_apply_texture(texture_table(t)) end
-	if d then 
-		local f=drawer_hooks(d[1])
-		if f then f(unpack(d,2)) end
-	end
+	if t then  apply_material(t) end
+	if d then direct_draw(d) end
+	return o
 end
 
-local draw_obj_post=function(o)
-	if o.texture then API.pop_texture() end
+local draw_obj_post_=function(o)
 	if o.matrix then API.pop_matrix() end
+	return o
 end
 
 local draw_scn=function(scn)
-	do_tree(scn,draw_obj_pre,draw_obj_post)
+	do_tree(scn,draw_obj_pre_,draw_obj_post_)
 	return scn
 end
 
@@ -70,8 +74,8 @@ f=function(filepath)
 	print("Loading",filepath,"...")
 	local state,scn=pcall(dofile,filepath)
 	if state then
-		print("Success!")
 		draw_scn(scn)
+		print("Success!")
 	else
 		print(scn) 	-- print error msg
 	end
@@ -137,6 +141,21 @@ require "plugin/nurbs"
 
 f=function(control_grid,u_knots,v_knots)
 	local grid=make_nurbs_surface(control_grid)
+	print("NURBS:",#grid,#grid[1])
+--~ 	for i,row in ipairs(grid) do
+--~ 		for j,v in ipairs(row) do
+--~ 			print(i,j,":",unpack(v))
+--~ 		end
+--~ 	end
+	local mesh=grid2mesh(grid)
+	return draw_mesh(mesh)
+end
+drawer_hooks("NURBS",f)
+
+require "plugin/models"
+
+f=function(control_grid,u_sep,v_sep,uv_weights,up,vp,u_knots,v_knots)
+	local grid=make_nurbs_surface(control_grid,u_sep,v_sep,uv_weights,up,vp,u_knots,v_knots)
 	print("NURBS:",#grid,#grid[1])
 --~ 	for i,row in ipairs(grid) do
 --~ 		for j,v in ipairs(row) do

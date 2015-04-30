@@ -73,15 +73,21 @@ camera_type camera_type_look(camera_type c);
 /* OpenGL helper*/
 
 
+//~ mat4x4 push_and_apply_matrix(mat4x4 m);
+
+//~ GLuint push_and_apply_texture(GLuint t);
+
+//~ mat4x4 pop_matrix(void);
+
+//~ GLuint pop_texture(void);
+
+//~ int my_init(unsigned int matrix_max,unsigned int texture_max);
+
 mat4x4 push_and_apply_matrix(mat4x4 m);
+GLuint apply_texture(GLuint tid);
+void pop_matrix(void);
 
-GLuint push_and_apply_texture(GLuint t);
-
-mat4x4 pop_matrix(void);
-
-GLuint pop_texture(void);
-
-int my_init(unsigned int matrix_max,unsigned int texture_max);
+int my_init(void);
 
 
 
@@ -140,11 +146,4 @@ GLuint prepare_shadowmap(void);
 int build_shadowmap(camera_type light,render_type r);
 int bind_shadowmap(camera_type light, GLhandleARB shader,render_type r);
 
-/*Nurbs helper*/
-typedef unsigned int index_t;
-
-scalar* make_vector_n(index_t n);
-scalar* make_knots(index_t n,index_t p);
-unsigned int find_span(index_t n,index_t p,scalar u,scalar* knots);
-scalar* compute_N(scalar u,index_t p, scalar * knots,scalar * N);
 

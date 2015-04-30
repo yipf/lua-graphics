@@ -25,37 +25,16 @@ Shade: %b[Flat,Smooth]
 ]]
 
 require "lua-utils/tree"
-
 local do_tree=do_tree
 
-local init_callid_and_texture=function(o)
-	local drawer,texture=o.drawer,o.texture
-	drawer=drawer and init_drawer(drawer) 
-	if texture then o.texture_id=texture_table(texture) end
-	if drawer and (not o.DYNAMIC) then o.drawer_id=calllist_table(drawer) end
-	return o
-end
-
-local draw_obj_pre=function(o)
-	local m,d,t=o.matrix,o.drawer_id,o.texture_id
-	if m then API.push_and_apply_matrix(m) end
-	if t then  API.push_and_apply_texture(t) end
-	d=o.DYNAMIC and API.draw_direct(o.drawer) or d and API.call_list(d)
-	return o
-end
-
-local draw_obj_post=function(o)
-	if o.texture_id then API.pop_texture() end
-	if o.matrix then API.pop_matrix() end
-	return o
-end
+require "render/render_funcs"
+local init_obj, apply_material, draw_obj_pre, draw_obj_post = init_obj, apply_material, draw_obj_pre, draw_obj_post 
 
 local API=API
 local light_camera=API.create_camera()
 light_camera=API.make_camera(light_camera,0,0,0,0)
 light_camera=API.set_camera_projection(light_camera,1,1000,math.rad(90),1)
 light_camera=API.update_camera(light_camera)
-
 
 make_gl_canvas=function(scn,camera,w,h)
 	local cfg=scn.config or {"Config The Opengl Windows",0,1,0,"65 105 225",1,1,2,1,1,1,1}
@@ -106,11 +85,11 @@ make_gl_canvas=function(scn,camera,w,h)
 		map_cb=function(o)
 			MakeCurrent(o)
 			if not init then 
-				API.my_init(100,100) 
+				API.my_init() 
 				shadow_render=API.create_render(2048,2048,API.DEPTH)
 				init=true 
 			end
-			do_tree(scn,init_callid_and_texture)
+			do_tree(scn,init_obj)
 			
 			light_shader=light_shader and shader_table(light_shader) or 0
 			

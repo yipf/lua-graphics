@@ -5,6 +5,8 @@
 require 'geo/shapes'
 require 'geo/transformers'
 
+
+
 local rad,sin,cos=math.rad,math.sin,math.cos
 
 local geo1={"grid",rotate_obj(arc(rad(-90),rad(90),10),rad(0),rad(-360),10,{0,1,0}),false,true}
@@ -50,6 +52,8 @@ local geo={"grid",rotate_obj(path,rad(0),rad(340),17,{0,1,0}),true,true}
 
 local wheel={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/wheels.lua"}
 
+--~ local wheel=dofile"/host/Files/DLU/luajit-img2d-3d/data/wheels.lua"
+
 local sphere={"sphere",5,nil,nil,nil,0,math.rad(180),-math.rad(30),math.rad(30)}
 
 local grid={}
@@ -59,15 +63,50 @@ local s=5
 for i=1,5 do
 	row={}
 	for j=1,5 do
-		row[j]={(j-1)*s,math.mod(i+j,2)*s,(1-i)*s}
+		row[j]={(j-1)*s,2*math.mod(i+j,2)*s,(1-i)*s}
 	end
 	grid[i]=row
 end
 
-local surface={"NURBS",grid}
+local surface={"NURBS",grid,10,10}
 local surface1={"grid",grid}
 
 local stick={"stick",{-10,5,10},{10,5,-10}}
+
+require 'plugin/drawers'
+
+local make_wave=function(speed)
+	local grid,row={}
+	local cos,sin,rad=math.cos,math.sin,math.rad
+	local ang,seed=0,0
+	for i,r in ipairs(samples(0,10,20)) do
+		row={}
+		for j,ang in ipairs(samples(rad(0),rad(360),30)) do
+			row[j]={r*cos(ang),seed,r*sin(ang)}
+		end
+		grid[i]=row
+	end
+	local f=drawer_hooks("grid")
+	local drawer=function()
+		f(grid)
+	end
+	speed=speed or 1
+	local step,bound=rad(speed),rad(360)
+	local actor=function()
+		seed=seed+step
+		while seed>bound do seed=seed-bound end
+		for r,row in ipairs(grid) do
+			for i,v in ipairs(row) do
+				v[2]=5*sin(r-seed)/r
+			end
+		end
+	end
+	return drawer,actor
+end
+
+local wave_drawer,wave_actor=make_wave(5)
+
+
 
 local scn={
  config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,0,1,1},
@@ -75,6 +114,9 @@ local scn={
   light_shader={"built-in","spot-light&shadow"},
   
   drawer={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua"},
+--~   
+--~   dofile"/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua",
+  
 --~   drawer={"plane",30},
   
   { 	matrix=API.make_translate(API.create_mat4x4(),0,10,10),
@@ -83,7 +125,7 @@ local scn={
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=wheel,material={map_Kd=chess}, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot3,m,m)
   end},
@@ -96,7 +138,7 @@ local scn={
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=wheel,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=wheel,matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot31,m,m)
   end},
@@ -115,7 +157,7 @@ local scn={
 --~   end},
 --~   },
    { 	matrix=API.make_translate(API.create_mat4x4(),0,5,0),
-		{texture=chess,drawer=surface,},
+		{drawer=surface,},
 --~ 		{texture={"color",{0,255,0}},	drawer=surface1,},
 	},
         { 	matrix=API.make_translate(API.create_mat4x4(),0,17,10),
@@ -124,10 +166,16 @@ local scn={
 --~ 	  API.mult_matrix(rot1,m,m)
 --~   end},
 --~   
-    {drawer=sphere,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+    {drawer=sphere,matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
 	  local m=o.matrix
 	  API.mult_matrix(rot31,m,m)
   end},
+  
+	{ 	matrix=API.make_translate(API.create_mat4x4(),0,-14,3),
+		drawer=wave_drawer,actor=wave_actor,
+		material={map_Kd={"color",{0x6C,0xA6,0xCD}}}
+--~ 		{texture={"color",{0,255,0}},	drawer=surface1,},
+	},
   
   
   },

@@ -122,7 +122,7 @@ make_nurbs_curve=function(control_points,p,sep,weights,knots)
 	return curve
 end
 
-make_nurbs_surface=function(control_grid,up,vp,u_sep,v_sep,uv_weights,u_knots,v_knots)
+make_nurbs_surface=function(control_grid,u_sep,v_sep,uv_weights,up,vp,u_knots,v_knots)
 	local m,n=#control_grid,#control_grid[1]
 	up=up or regular_poly(m)
 	vp=vp or regular_poly(n)

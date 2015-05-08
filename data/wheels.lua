@@ -52,8 +52,8 @@ for i,v in ipairs(outline2) do
 end
 
 return {
-	{drawer={"grid",{outline1,inline1},true,false}},
-	{drawer={"grid",{inline2,outline2},true,false}},
-	{drawer={"grid",{inline1,inline2}},true,false},
-	{drawer={"grid",{outline2,outline1},true,false}},
+	{drawer={"grid",{clone(outline1),clone(inline1),uclosed=true}}},
+	{drawer={"grid",{clone(inline2),clone(outline2),uclosed=true}}},
+	{drawer={"grid",{clone(inline1),clone(inline2),uclosed=true}}},
+	{drawer={"grid",{clone(outline2),clone(outline1),uclosed=true}}},
 }

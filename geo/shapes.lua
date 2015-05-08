@@ -4,11 +4,11 @@ local normalize,cross,tangent=normalize,cross,tangent
 require 'lua-utils/obj'
 local clone=copy
 
-grid2mesh=function(grid,uclosed,vclosed) 	-- convert a point grid to a drawerable mesh
+gen_normal=function(grid)
 	local r,c=#grid,#grid[1]
+	local uclosed,vclosed=grid.uclosed,grid.vclosed
 	if r<2 or c<2 then return end
 	local T
-	-- generate normals
 	for i,row in ipairs(grid) do
 		T=tangent(row,uclosed)
 		for j,cell in ipairs(row) do cell.U=T[j] end
@@ -23,16 +23,36 @@ grid2mesh=function(grid,uclosed,vclosed) 	-- convert a point grid to a drawerabl
 			cell.N=normalize(cross(cell.U,cell.V))
 		end
 	end
-	-- set texture
-	if uclosed then for i,v in ipairs(grid) do v[c+1]=clone(v[1]) end end
-	if vclosed then grid[r+1]=clone(grid[1]) end
-	r,c=#grid,#grid[1]
+	return grid
+end
+
+gen_texcoord=function(grid)
+	local r,c=#grid,#grid[1]
+	local uclosed,vclosed=grid.uclosed,grid.vclosed
 	local du,dv=1/(c-1),1/(r-1)
 	for v,row in ipairs(grid) do
 		for u,cell in ipairs(row) do
 			cell.T={(u-1)*du,(v-1)*dv}
 		end
 	end
+	return grid
+end
+
+local copy=function(src,dst)
+	dst=dst or {}
+	for k,v in pairs(src) do
+		dst[k]=v	
+	end
+	return dst
+end
+
+grid2mesh=function(grid) 	-- convert a point grid to a drawerable mesh
+	local uclosed,vclosed=grid.uclosed,grid.vclosed
+	local r,c=#grid,#grid[1]
+	gen_normal(grid)
+	if uclosed then for i,v in ipairs(grid) do v[c+1]=copy(v[1]) end end
+	if vclosed then grid[r+1]=copy(grid[1]) end
+	gen_texcoord(grid)
 	return grid
 end
 

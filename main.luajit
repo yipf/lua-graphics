@@ -17,5 +17,5 @@ local load_scn=function(name,path)
 	dofile(s)
 end
 
-load_scn"debug-shape"
+load_scn"debug-obj"
 --~ load_scn"debug-img"

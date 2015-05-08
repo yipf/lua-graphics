@@ -47,10 +47,18 @@ file2table=function(filepath,dst,hooks,dir,kv_pattern)
 	dst=dst or {}
 	kv_pattern=kv_pattern or "^%s*(.-)%s+(.-)%s*$"
 	local key,value,hook
-	for line in io.lines(dir..name_ext) do 
-		key,value=match(line,kv_pattern)
-		hook=key and hooks(key)
-		if hook then hook(value,dst,dir) end
+	local fhandle=io.open(filepath)
+	if fhandle then
+		print("Parsing",filepath,"...")
+		for line in fhandle:lines() do 
+			key,value=match(line,kv_pattern)
+			hook=key and hooks[key]
+			if hook then hook(value,dst,dir) end
+		end
+		fhandle:close()
+		print("Success!")
+	else
+		print("Invalid filepath:",filepath)
 	end
 	return dst
 end

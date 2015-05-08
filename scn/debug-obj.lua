@@ -35,7 +35,7 @@ m7=API.mult_matrix(T,m5,API.create_mat4x4())
 
 T=API.make_translate(T,0,10,10)
 
-local rot1=API.make_rotate(API.create_mat4x4(),0,1,0,math.rad(5))
+local rot1=API.make_rotate(API.create_mat4x4(),0,1,0,math.rad(1))
 local rot2=API.make_rotate(API.create_mat4x4(),1,0,0,math.rad(5))
 local rot3=API.make_rotate(API.create_mat4x4(),0,0,1,math.rad(5))
 local rot31=API.make_rotate(API.create_mat4x4(),0,0,1,math.rad(-5))
@@ -75,87 +75,31 @@ local stick={"stick",{-10,5,10},{10,5,-10}}
 
 local node=dofile
 
+local obj_matrix=API.make_scale(API.create_mat4x4(),10,10,10)
+obj_matrix[12]=0
+obj_matrix[13]=5
+obj_matrix[14]=0
+
 
 local scn={
- config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,0,1,1},
+ config={"Config The Opengl Windows",0,1,0,"65 105 225",1,20,40,20,1,1,1},
   
   light_shader={"built-in","spot-light&shadow"},
   
   drawer={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua"},
---~   
---~   dofile"/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua",
-  
---~   drawer={"plane",30},
-  
-  { 	matrix=API.make_translate(API.create_mat4x4(),0,15,10),
---~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot1,m,m)
---~   end},
---~   
-    {drawer=wheel,material={map_Kd=chess}, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
+
+--~ {drawer={"obj","data/cow.obj"},matrix=obj_matrix,material={map_Kd={"color",{0xFF,0xFF,0xFF}}}},
+{
+--~ drawer={"obj","/host/Files/lua-platform/data/dragon.obj"},
+drawer={"point-cloud","/host/Files/lua-platform/data/rabbit.obj",0.015},
+
+matrix=obj_matrix,material={map_Kd={"color",{255,215,0}}},actor=function(o)
 	  local m=o.matrix
-	  API.mult_matrix(rot3,m,m)
-  end},
-  
-  },
-  
-    { 	matrix=API.make_translate(API.create_mat4x4(),7,15,10),
---~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot1,m,m)
---~   end},
---~   
-    {drawer=wheel,matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
-	  local m=o.matrix
-	  API.mult_matrix(rot31,m,m)
-  end},
-  
-  },
+	  API.mult_matrix(rot1,m,m)
+	  end
+	  },
 
---~       { 	matrix=API.make_translate(API.create_mat4x4(),7,17,10),
---~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot1,m,m)
---~   end},
---~   
---~     {drawer=stick,texture=chess, matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot3,m,m)
---~   end},
---~   },
-   { 	matrix=API.make_translate(API.create_mat4x4(),0,5,0),
-		{drawer=surface,},
---~ 		{texture={"color",{0,255,0}},	drawer=surface1,},
-	},
-        { 	matrix=API.make_translate(API.create_mat4x4(),0,20,10),
---~   {drawer={"box",2},texture=chess, matrix=m5,actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot1,m,m)
---~   end},
---~   
-    {drawer=sphere,matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
-	  local m=o.matrix
-	  API.mult_matrix(rot31,m,m)
-  end},
-  
-	{ 	matrix=API.make_translate(API.create_mat4x4(),0,-10,-10),
---~ 		dofile "data/pool.lua",
-		drawer={"obj","data/cube.obj"},
---~ 		{texture={"color",{0,255,0}},	drawer=surface1,},
-
-	}
-  },
-  
---~ 	{drawer=wheel,texture={"color",{255,0,0,255}},matrix=API.make_translate(API.create_mat4x4(),0,0,0),actor=function(o)
---~ 	  local m=o.matrix
---~ 	  API.mult_matrix(rot1,m,m)
---~   end,},
-  
-
-   
-  
-
+--~ {drawer={"obj","/host/Files/lua-platform/data/horse.obj"}},
 }
 
 ------------------------------------------------------------------------------------------

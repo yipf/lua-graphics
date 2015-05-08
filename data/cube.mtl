@@ -1,0 +1,11 @@
+# Created with Anim8or 0.97d beta
+# Object "cube":
+
+newmtl material01
+Ka 0.875 0.875 0.875
+Kd 0.875 0.875 0.875
+Ks 1 1 1
+d 1.0
+Ns 752.6
+map_Kd sky.jpg
+

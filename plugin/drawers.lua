@@ -39,10 +39,10 @@ local draw_mesh=function(mesh)
 	end
 	return mesh
 end
-drawer_hooks("mesh",f)
+drawer_hooks("mesh",draw_mesh)
 
-f=function(grid,uclosed,vclosed)
-	return draw_mesh(grid2mesh(grid,uclosed,vclosed))
+f=function(grid)
+	return draw_mesh(grid2mesh(grid))
 end
 drawer_hooks("grid",f)
 
@@ -142,11 +142,6 @@ require "plugin/nurbs"
 f=function(control_grid,u_knots,v_knots)
 	local grid=make_nurbs_surface(control_grid)
 	print("NURBS:",#grid,#grid[1])
---~ 	for i,row in ipairs(grid) do
---~ 		for j,v in ipairs(row) do
---~ 			print(i,j,":",unpack(v))
---~ 		end
---~ 	end
 	local mesh=grid2mesh(grid)
 	return draw_mesh(mesh)
 end
@@ -154,16 +149,185 @@ drawer_hooks("NURBS",f)
 
 require "plugin/models"
 
-f=function(control_grid,u_sep,v_sep,uv_weights,up,vp,u_knots,v_knots)
-	local grid=make_nurbs_surface(control_grid,u_sep,v_sep,uv_weights,up,vp,u_knots,v_knots)
-	print("NURBS:",#grid,#grid[1])
---~ 	for i,row in ipairs(grid) do
---~ 		for j,v in ipairs(row) do
---~ 			print(i,j,":",unpack(v))
---~ 		end
---~ 	end
-	local mesh=grid2mesh(grid)
-	return draw_mesh(mesh)
+local combine=function(arr)
+	local x,y,z=0,0,0
+	for i,v in ipairs(arr) do
+		x=x+v[1]
+		y=y+v[2]
+		z=z+v[3]
+	end
+	return normalize{x,y,z}
 end
-drawer_hooks("NURBS",f)
+
+local append_normals=function(vids,V,n)
+	assert(n>2)
+	local v1,v2,v3=V[vids[1]],V[vids[2]],V[vids[3]]
+	local normal=normalize(cross(sub(v2,v1),sub(v3,v2)))
+	local target,normals
+	local push=table.insert
+	for i=1,n do
+		target=V[vids[i]]
+		normals=target.normals or {}
+		push(normals,normal)
+		target.normals=normals
+	end
+	return V
+end
+
+local compute_normal=function(obj)
+	if obj.NORMAL_COMPLETE then return obj end
+	local V=obj.V
+	local key,value
+	local vids={}
+	for i,v in ipairs(obj) do
+		key,value=unpack(v)
+		if key=="face" then
+			for i,vertice in ipairs(value) do
+				vids[i]=vertice[1]
+			end
+			append_normals(vids,V,#value)
+		end
+	end
+	for i,v in ipairs(V) do
+		v.normal=combine(v.normals)
+	end
+	obj.NORMAL_COMPLETE=true
+	return obj
+end
+
+local computer_texcoord=function(obj)
+	if obj.TEXCOORD_COMPLETE then return obj end
+	for i,v in ipairs(obj.V) do
+		v.texcoord={0.5,0.5}
+	end
+	obj.TEXCOORD_COMPLETE=true
+	return obj
+end
+
+f=function(filepath)
+	local func=importers("obj")
+	local obj=func(filepath)
+	local key,value
+	local V,T,N=obj.V,obj.T,obj.N
+	local vid,tid,nid
+	print("drawing",filepath)
+	for i,v in ipairs(obj) do
+		key,value=unpack(v)
+		if key=="mtl" then 
+--~ 			apply_material(value)
+		elseif key=="face" then
+			API.begin_draw(#value==4 and API.QUADS or API.TRIANGLE_STRIP)
+			for ii,vertice in ipairs(value) do
+				vid,tid,nid=unpack(vertice)
+				vid=V[vid]
+				if not tid then 
+					computer_texcoord(obj) 
+					tid=vid.texcoord
+				else
+					tid=T[tid]
+				end
+				if not nid then
+					compute_normal(obj)
+					nid=vid.normal
+				else
+					nid=N[nid]
+				end
+				API.set_vertex(vid[1],vid[2],vid[3],tid[1],tid[2],nid[1],nid[2],nid[3])
+			end
+			API.end_draw()
+		end
+	end
+	print("end")
+end
+drawer_hooks("obj",f)
+
+local draw_box=function(x,y,z,rx,ry,rz)
+	x=x or 0
+	y=y or 0
+	z=z or 0
+	rx=rx or 1
+	ry=ry or rx
+	rz=rz or ry
+	API.begin_draw(API.QUADS)
+	-- right
+	API.set_vertex(x+rx,y+0,z+rz,		0,0,		1,0,0)
+	API.set_vertex(x+rx,y+0,z+0,		0,1,		1,0,0)
+	API.set_vertex(x+rx,y+ry,z+0,		1,1,		1,0,0)
+	API.set_vertex(x+rx,y+ry,z+rz,		1,0,		1,0,0)
+	-- left
+	API.set_vertex(x+0,y+0,z+0,		0,0,		-1,0,0)
+	API.set_vertex(x+0,y+0,z+rz,		0,1,		-1,0,0)
+	API.set_vertex(x+0,y+ry,z+rz,		1,1,		-1,0,0)
+	API.set_vertex(x+0,y+ry,z+0,		1,0,		-1,0,0)
+	-- top
+	API.set_vertex(x+0,y+ry,z+rz,		0,0,		0,1,0)
+	API.set_vertex(x+rx,y+ry,z+rz,		0,1,		0,1,0)
+	API.set_vertex(x+rx,y+ry,z+0,		1,1,		0,1,0)
+	API.set_vertex(x+0,y+ry,z+0,		1,0,		0,1,0)
+	-- bottom
+	API.set_vertex(x+0,y+0,z+0,		0,0,		0,-1,0)
+	API.set_vertex(x+rx,y+0,z+0,		0,1,		0,-1,00)
+	API.set_vertex(x+rx,y+0,z+rz,		1,1,		0,-1,0)
+	API.set_vertex(x+0,y+0,z+rz,		1,0,		0,-1,0)
+		-- right
+	API.set_vertex(x+0,y+0,z+rz,		0,0,		0,0,1)
+	API.set_vertex(x+rx,y+0,z+rz,		0,1,		0,0,1)
+	API.set_vertex(x+rx,y+ry,z+rz,		1,1,		0,0,1)
+	API.set_vertex(x+0,y+ry,z+rz,		1,0,		0,0,1)
+	-- left
+	API.set_vertex(x+rx,y+0,z+0,		0,0,		0,0,-1)
+	API.set_vertex(x+0,y+0,z+0,		0,1,		0,0,-1)
+	API.set_vertex(x+0,y+ry,z+0,		1,1,		0,0,-1)
+	API.set_vertex(x+rx,y+ry,z+0,		1,0,		0,0,-1)
+	API.end_draw()
+end
+
+f=function(x,y,z,rx,ry,rz)
+	return draw_box(x-rx/2,y-ry/2,z-rz/2,rx,ry,rz)
+end
+drawer_hooks("box-point",f)
+
+local format,tostring=string.format,tostring
+local value2key=function(x,y,z)
+	return format("%s,%s,%s",tostring(x),tostring(y),tostring(z))
+end
+
+local push=table.insert
+local get=function(t,x,y,z)
+	local k=value2key(x,y,z)
+	local s=t[k]
+	if not s then s={x=x,y=y,z=z};t[k]=s;push(t,s) end
+	return s
+end
+
+local floor=math.floor
+local append_box=function(boxs,x,y,z,r)
+	local xid,yid,zid=floor(x/r),floor(y/r),floor(z/r)
+	local target=get(boxs,xid,yid,zid)	
+	push(target,{x,y,z})
+end
+
+f=function(filepath,r)
+	r=r or 1
+	local fhandle=io.open(filepath)
+	local boxs={}
+	if fhandle then
+		local match=string.match
+		for line in fhandle:lines() do
+			x,y,z=match(line,"^%s*v%s+(%S+)%s+(%S+)%s+(%S+)%s*$")
+			if x then
+				append_box(boxs,tonumber(x),tonumber(y),tonumber(z),r)
+			end
+		end
+		fhandle:close()
+	else
+		print("Invalid filepath:",filepath)
+		return 
+	end
+	print(#boxs)
+	for i,v in ipairs(boxs) do
+		draw_box(v.x*r,v.y*r,v.z*r,r)
+	end
+end
+drawer_hooks("point-cloud",f)
 

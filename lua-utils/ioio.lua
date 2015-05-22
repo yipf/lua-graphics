@@ -5,8 +5,10 @@ local file2str_=function(path,str)
 	if f then 
 		str=f:read("*a")
 		f:close()
+	else
+		print(string.format("Can't open file %q !",path))
 	end
-	return str or string.format("Can't open file %q !",path)
+	return str
 end
 
 local str2file_=function(str,path,append)

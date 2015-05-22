@@ -91,7 +91,8 @@ local scn={
 --~ {drawer={"obj","data/cow.obj"},matrix=obj_matrix,material={map_Kd={"color",{0xFF,0xFF,0xFF}}}},
 {
 --~ drawer={"obj","/host/Files/lua-platform/data/dragon.obj"},
-drawer={"point-cloud","/host/Files/lua-platform/data/rabbit.obj",0.015},
+--~ drawer={"point-cloud","/host/Files/lua-platform/data/rabbit.obj",0.015},
+drawer={"volumn",{2,1,2},{10,10,10},{-1,0.1,-1}},
 
 matrix=obj_matrix,material={map_Kd={"color",{255,215,0}}},actor=function(o)
 	  local m=o.matrix

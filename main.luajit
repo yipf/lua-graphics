@@ -4,7 +4,7 @@ package.path=DIR.."/?.lua;"..package.path
 package.cpath="/usr/lib/lib?51.so;/usr/lib/lib?.so;"..package.cpath
 
 require 'lua-utils/clib-loader'
-API=clib_loader"yipf-img-gl"
+API=clib_loader("clibs/yipf-img-gl.h")
 
 require 'lua-utils/register'
 
@@ -17,5 +17,9 @@ local load_scn=function(name,path)
 	dofile(s)
 end
 
-load_scn"debug-obj"
+--~ load_scn"debug-obj"
 --~ load_scn"debug-img"
+
+-- test files
+require "math/scientifc_compute_gsl"
+

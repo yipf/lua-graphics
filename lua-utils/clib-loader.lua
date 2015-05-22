@@ -1,10 +1,12 @@
 require "lua-utils/ioio"
 
-local ffi=require "ffi"
-
-clib_loader=function(name,dir)
-	print("loading",name,"...")
-	local dir=dir or "./clibs/"
-	local des_str,lib=ffi.cdef(file2str(dir..name..".h")),ffi.load(dir..name..".so")
-	return lib
+clib_loader=function(cdef_filename,libpath,name)
+	libpath=libpath or string.gsub(cdef_filename,"^(.-)%.h$","%1%.so")
+	name=name or string.match(cdef_filename,"^.-([^/]*)%.([^%.]-)$")
+	print(string.format("Load modual %q from lib %q ...",name,libpath))
+	local ffi=require "ffi"
+	local str=file2str(cdef_filename) or ""
+	ffi.cdef(str)
+	print("Success!")
+	return ffi.load(libpath),ffi
 end

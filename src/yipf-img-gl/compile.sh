@@ -1,0 +1,1 @@
+gcc ./*.c -fPIC -shared -o ../../clibs/yipf-img-gl.so -lGLEW 

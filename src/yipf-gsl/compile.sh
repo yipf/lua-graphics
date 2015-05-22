@@ -1,0 +1,1 @@
+gcc ./*.c -fPIC -shared -o ../../clibs/yipf-gsl.so -lgsl -lgslcblas

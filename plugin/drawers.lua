@@ -83,7 +83,7 @@ f=function(filepath)
 end
 drawer_hooks("scn-file",f)
 
-f=function(r,c,u,v,su,eu,sv,ev)
+local draw_sphere=function(r,c,u,v,su,eu,sv,ev)
  	local sin,cos,rad=math.sin,math.cos,math.rad
 	u,v=u or 20,v or 10
 	c=c or {0,0,0}
@@ -107,7 +107,7 @@ f=function(r,c,u,v,su,eu,sv,ev)
 	end
 	return draw_mesh(mesh)
 end
-drawer_hooks("sphere",f)
+drawer_hooks("sphere",draw_sphere)
 
 local stick_coord
 f=function(from,to,r,n)
@@ -287,6 +287,11 @@ f=function(x,y,z,rx,ry,rz)
 end
 drawer_hooks("box-point",f)
 
+f=function(x,y,z,r)
+	return draw_sphere({x,y,z},r or 1)
+end
+drawer_hooks("sphere-point",f)
+
 local format,tostring=string.format,tostring
 local value2key=function(x,y,z)
 	return format("%s,%s,%s",tostring(x),tostring(y),tostring(z))
@@ -330,4 +335,55 @@ f=function(filepath,r)
 	end
 end
 drawer_hooks("point-cloud",f)
+
+local get_vol=function(vol,...)
+	local p,key=vol
+	for i=1,#arg do
+		key=arg[i]
+		p=p[key]
+		if not p then return end
+	end
+	return p
+end
+local make_volumn=function(range,sep)
+	local rx,ry,rz=unpack(range or {1,1,1})
+	ry=ry or rx;	rz=rz or ry;
+	local sx,sy,sz=unpack(sep or {1,1,1})
+	sy=sy or sx;	sz=sz or sy;
+	local dx,dy,dz=rx/sx,ry/sy,rz/sz
+	local vol,ys,zs={}
+	for x=0,sx-1 do
+		ys={}
+		for y=0,sy-1 do
+			zs={}
+			for z=0,sz-1 do
+				zs[z]={drawable=true}
+			end
+			ys[y]=zs
+		end
+		vol[x]=ys
+	end
+	return vol,rx,ry,rz,sx,sy,sz,dx,dy,dz
+end
+f=function(range,sep,base)
+	local bx,by,bz=unpack(base or {0,0,0})
+	local vol,rx,ry,rz,sx,sy,sz,dx,dy,dz=make_volumn(range,sep)
+	local ys,zs,cell
+	local random=math.random
+	for x=0,sz-1 do
+		ys=vol[x]
+		for y=0,sy-1 do
+			zs=ys[y]
+			for z=0,sz-1 do
+				cell=zs[z]
+				if random()>0.5 then
+--~ 					API.glColor(x/rx,y/ry,z/rz)
+					draw_box(bx+x*dx,by+y*dy,bz+z*dz,dx,dy,dz)
+				end
+			end
+		end
+	end
+end
+drawer_hooks("volumn",f)
+
 

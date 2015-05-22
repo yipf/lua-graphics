@@ -1,0 +1,12 @@
+
+local mat= matrix.def{
+
+	{1,0,0,0,2},
+	{0,0,3,0,0},
+	{0,0,0,0,0},
+	{0,4,0,0,0},
+}
+
+local mat2=mat*mat:transpose()
+
+--~ local u,s,v=matrix.svd(mat:transpose())

@@ -46,7 +46,7 @@ local make_compute_env=function(env)
 	end
 	local str2set=function(str)
 		local body,condition=match(str,"^%s*%{%s*(.-)%s*|%s*(.-)%s*%}%s*$")
-		if not body then return Set:new(eval(str)) end
+		if not body then return Set:new(eval(pair_parser(str))) end
 		local args,sets={},{}
 		local register_arg=function(arg,set)
 			push(args,arg)
@@ -70,7 +70,6 @@ local make_compute_env=function(env)
 		else
 			S=sets[1]
 			for i=2,n do S=S^sets[i] end
-			print("S","=",S)
 			for i,p in ipairs(S) do
 				for j,argname in ipairs(args) do
 					env[argname]=p[j]
@@ -103,14 +102,22 @@ local make_compute_env=function(env)
 	return generic_eval,set_env
 end
 
---~ local eval,set=make_compute_env(math)
+local eval,set=make_compute_env(math)
 
---~ eval[[
---~ f= x,y -> x^y+2
---~ f(2,3)
---~ A={1,2,3}
---~ B={x+2 | x in A}
---~ A*B
---~ D={ <a,b> | a<4 and b>2, a in A, b in B}
---~ ]]
+eval[[
+f= x,y -> x^y+2
+f(2,3)
+A={1,3}
+See={<1,2>,<1,2>}
+B={x+2 | x in A}
+A+B
+A-B
+A*B
+A^B
+A^0
+A^1
+A^2
+D={ <a,b> | a<4 and b>2, a in A, b in B}
+A/D
+]]
 

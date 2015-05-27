@@ -367,7 +367,7 @@ local set_remove=function(set,element)
 		pop(set,id)
 		for i=id,#set do	elements[set[i]]=i		end
 	end
-	return set
+	return element
 end
 
 local element2str
@@ -449,9 +449,45 @@ local set_pow=function(A,B)
 	end
 end
 
+local test_relation=function(S,r)
+	for i,v in ipairs(r) do
+		if S:include(v)  then			return true 		end
+	end
+	return false
+end
 
-local set_classify=function(A,B)
-	
+local relation_set
+relation_set=function(R,S,SUP)
+	local R_rest=clone_set(R)
+	for r in R:each() do
+		if test_relation(S,r) then 
+			R_rest:remove(r)
+			for i,e in ipairs(r) do 
+				if SUP:include(e) then S:insert(e) end
+			end
+			return relation_set(R_rest,S,SUP)
+		end
+	end
+	return R_rest,S
+end
+
+local set_classify=function(A,R) -- to implement, where R is a relationship on set A
+	if not R[1] then return end
+	local subsets,subset,r={}
+	local R=clone_set(R)
+	while R[1] do
+		r=R[1]
+		subset=A:new()
+		for i,e in ipairs(r) do 	-- fill subset with prop elements
+			if A:include(e) then subset:insert(e) end
+		end
+		R:remove(r)
+		R,subset=relation_set(R,subset,A)
+		push(subsets,subset)
+		A=A-subset
+	end
+	if A[1] then push(subsets,A) end
+	return unpack(subsets)
 end
 
 local set_le=function(A,B)
@@ -500,6 +536,19 @@ local set_mt=make_metatable{
 
 Set=setmetatable({},set_mt)
 
+
+local relation=function(...)
+	return rawset(arg,"__ISPAIR",true)
+end
+
+--~ local A=Set:new{1,2,3,4,5,6,7}
+--~ local R=Set:new{relation(1,2),relation(2,2),relation(3,3),relation(1,4),}
+
+--~ local B=A/R
+
+--~ print("A","=",A)
+--~ print("R","=",R)
+--~ print("B","=",unpack(B))
 
 --~ local A=Set:new{1,1,1,2,2,3,4,5}
 --~ print("A=",A)

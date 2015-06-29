@@ -28,7 +28,7 @@ void main (void){
 	// compute shadow fact
 	vec4 shadowCoordinateWdivide = ShadowCoord / ShadowCoord.w ;
 	vec4 shadowTexel=texture2D(shadowmap,shadowCoordinateWdivide.st);
-	float distanceFromLight = shadowTexel.z+0.0001;
+	float distanceFromLight = shadowTexel.z;
 	//~ float distanceFromLight = shadowTexel.z;
  	float shadow = 1.0;
  	if (ShadowCoord.w > 0.0) shadow = distanceFromLight < shadowCoordinateWdivide.z ? 0.5 : 1.0 ;
@@ -40,7 +40,6 @@ void main (void){
 	float y=shadowCoordinateWdivide.y*2.0-1.0;
 	if((x*x+y*y)>1.0) {shadow=0.5;}
 
-	
 	// compute final color
 	gl_FragColor=shadow*f*texture2D(tex,gl_TexCoord[0].st);  
 }

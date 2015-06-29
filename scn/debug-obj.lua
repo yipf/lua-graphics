@@ -86,13 +86,15 @@ local scn={
   
   light_shader={"built-in","spot-light&shadow"},
   
-  drawer={"scn-file","/host/Files/DLU/luajit-img2d-3d/data/base_scn.lua"},
+  drawer={"scn-file","./data/base_scn.lua"},
 
 --~ {drawer={"obj","data/cow.obj"},matrix=obj_matrix,material={map_Kd={"color",{0xFF,0xFF,0xFF}}}},
 {
---~ drawer={"obj","/host/Files/lua-platform/data/dragon.obj"},
+--~ drawer={"obj","/home/yipf/Downloads/host/Files/lua-platform/data/dragon.obj"},
+--~ drawer={"box",10},
 --~ drawer={"point-cloud","/host/Files/lua-platform/data/rabbit.obj",0.015},
-drawer={"volumn",{2,1,2},{10,10,10},{-1,0.1,-1}},
+drawer={"volumn",{2,1,2},{20,10,20},{-1,0.1,-1}},
+
 
 matrix=obj_matrix,material={map_Kd={"color",{255,215,0}}},actor=function(o)
 	  local m=o.matrix

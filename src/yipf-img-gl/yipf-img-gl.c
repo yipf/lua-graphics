@@ -260,6 +260,7 @@ int my_init(void){
 	glEnable(GL_DEPTH_TEST);   // Enables Depth Testing
 	glDepthFunc(GL_LEQUAL);    // The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
+	glFrontFace(GL_CCW);
 	glEnable(GL_NORMALIZE);
 	glAlphaFunc(GL_GREATER,0.1); 
 	glEnable(GL_TEXTURE_2D); // always enable textures

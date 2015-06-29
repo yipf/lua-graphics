@@ -250,35 +250,35 @@ local draw_box=function(x,y,z,rx,ry,rz)
 	rz=rz or ry
 	API.begin_draw(API.QUADS)
 	-- right
-	API.set_vertex(x+rx,y+0,z+rz,		0,0,		1,0,0)
+	API.set_vertex(x+rx,y+0,z+rz,	0,0,		1,0,0)
 	API.set_vertex(x+rx,y+0,z+0,		0,1,		1,0,0)
-	API.set_vertex(x+rx,y+ry,z+0,		1,1,		1,0,0)
-	API.set_vertex(x+rx,y+ry,z+rz,		1,0,		1,0,0)
+	API.set_vertex(x+rx,y+ry,z+0,	1,1,		1,0,0)
+	API.set_vertex(x+rx,y+ry,z+rz,	1,0,		1,0,0)
 	-- left
 	API.set_vertex(x+0,y+0,z+0,		0,0,		-1,0,0)
 	API.set_vertex(x+0,y+0,z+rz,		0,1,		-1,0,0)
-	API.set_vertex(x+0,y+ry,z+rz,		1,1,		-1,0,0)
+	API.set_vertex(x+0,y+ry,z+rz,	1,1,		-1,0,0)
 	API.set_vertex(x+0,y+ry,z+0,		1,0,		-1,0,0)
 	-- top
 	API.set_vertex(x+0,y+ry,z+rz,		0,0,		0,1,0)
 	API.set_vertex(x+rx,y+ry,z+rz,		0,1,		0,1,0)
 	API.set_vertex(x+rx,y+ry,z+0,		1,1,		0,1,0)
-	API.set_vertex(x+0,y+ry,z+0,		1,0,		0,1,0)
+	API.set_vertex(x+0,y+ry,z+0,			1,0,		0,1,0)
 	-- bottom
 	API.set_vertex(x+0,y+0,z+0,		0,0,		0,-1,0)
-	API.set_vertex(x+rx,y+0,z+0,		0,1,		0,-1,00)
-	API.set_vertex(x+rx,y+0,z+rz,		1,1,		0,-1,0)
+	API.set_vertex(x+rx,y+0,z+0,		0,1,		0,-1,0)
+	API.set_vertex(x+rx,y+0,z+rz,	1,1,		0,-1,0)
 	API.set_vertex(x+0,y+0,z+rz,		1,0,		0,-1,0)
-		-- right
+	--front
 	API.set_vertex(x+0,y+0,z+rz,		0,0,		0,0,1)
-	API.set_vertex(x+rx,y+0,z+rz,		0,1,		0,0,1)
-	API.set_vertex(x+rx,y+ry,z+rz,		1,1,		0,0,1)
-	API.set_vertex(x+0,y+ry,z+rz,		1,0,		0,0,1)
-	-- left
+	API.set_vertex(x+rx,y+0,z+rz,	0,1,		0,0,1)
+	API.set_vertex(x+rx,y+ry,z+rz,	1,1,		0,0,1)
+	API.set_vertex(x+0,y+ry,z+rz,	1,0,		0,0,1)
+	-- back
 	API.set_vertex(x+rx,y+0,z+0,		0,0,		0,0,-1)
 	API.set_vertex(x+0,y+0,z+0,		0,1,		0,0,-1)
 	API.set_vertex(x+0,y+ry,z+0,		1,1,		0,0,-1)
-	API.set_vertex(x+rx,y+ry,z+0,		1,0,		0,0,-1)
+	API.set_vertex(x+rx,y+ry,z+0,	1,0,		0,0,-1)
 	API.end_draw()
 end
 
